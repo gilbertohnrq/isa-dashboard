@@ -1,0 +1,8 @@
+<svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 90 91" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Airplane Mode" opacity="0.25">
+<rect width="90" height="91" rx="45" fill="var(--fill-0, #111111)" fill-opacity="0.6" style="mix-blend-mode:luminosity"/>
+<rect width="90" height="91" rx="45" fill="var(--fill-1, #919191)" style="mix-blend-mode:color-dodge"/>
+<rect width="90" height="91" rx="45" fill="var(--fill-2, #222222)" style="mix-blend-mode:plus-lighter"/>
+<path id="Vector" d="M49.7568 41.595L68.3704 20H63.9596L47.7974 38.7507L34.8887 20H20L39.5205 48.3543L20 71H24.4111L41.4788 51.1987L55.1113 71H70L49.7557 41.595H49.7568ZM43.7152 48.6041L41.7374 45.7807L26.0005 23.3142H32.7756L45.4755 41.4454L47.4533 44.2688L63.9617 67.8365H57.1865L43.7152 48.6052V48.6041Z" fill="var(--fill-0, white)"/>
+</g>
+</svg>
