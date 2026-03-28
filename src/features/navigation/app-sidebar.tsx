@@ -20,7 +20,7 @@ export function AppSidebar() {
     <GlassPanel
       as="aside"
       tone="strong"
-      className="workspace-sidebar border-white/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.16),rgba(255,255,255,0.06)),linear-gradient(180deg,rgba(27,29,33,0.92),rgba(20,22,24,0.74))]"
+      className="workspace-sidebar border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.14),rgba(255,255,255,0.04)),linear-gradient(180deg,rgba(26,28,32,0.78),rgba(18,20,23,0.48))]"
     >
       <div className="workspace-sidebar__brand">
         <div className="workspace-sidebar__brand-mark">TC</div>

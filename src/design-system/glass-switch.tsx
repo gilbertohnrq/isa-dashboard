@@ -11,16 +11,16 @@ export function GlassSwitch({ checked }: { checked: boolean }) {
       data-testid="glass-switch"
       data-state={checked ? "checked" : "unchecked"}
       className={cn(
-        "relative flex h-7 w-16 items-center overflow-hidden rounded-full p-0.5",
-        checked ? "bg-[var(--accent-green)]" : "bg-[rgba(60,60,67,0.3)]",
+        "relative flex h-[24px] w-[46px] items-center overflow-hidden rounded-full border border-white/18 p-px shadow-[var(--shadow-soft)] backdrop-blur-xl",
+        checked
+          ? "bg-[linear-gradient(180deg,rgba(123,210,132,0.5),rgba(123,210,132,0.26))]"
+          : "bg-[linear-gradient(180deg,rgba(255,255,255,0.16),rgba(255,255,255,0.08)),rgba(235,240,255,0.04)]",
       )}
     >
-      {!checked && (
-        <span className="absolute right-[7px] top-1/2 h-2.5 w-[21px] -translate-y-1/2 rounded-full bg-white/65" />
-      )}
+      {!checked && <span className="absolute right-[6px] size-[7px] rounded-full border border-white/45" />}
       <motion.span
-        className="block h-6 w-[39px] rounded-full bg-white"
-        animate={{ x: checked ? 21 : 0 }}
+        className="block h-[20px] w-[20px] rounded-full bg-white shadow-[0_1px_8px_rgba(255,255,255,0.28)]"
+        animate={{ x: checked ? 22 : 0 }}
         transition={{ duration: 0.2, ease: "easeOut" }}
       />
     </div>

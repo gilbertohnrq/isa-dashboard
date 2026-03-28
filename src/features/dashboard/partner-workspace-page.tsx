@@ -41,8 +41,8 @@ export function PartnerWorkspacePage({ section }: { section: WorkspaceSection })
       return (
         <div className="dashboard-shell">
           <DashboardTopBar snapshot={currentSnapshot.topBar} onPresetChange={setPreset} />
-          <div className="mt-[42px] flex flex-col gap-6 xl:gap-[64px]">
-            <div className="flex flex-col gap-6 2xl:flex-row 2xl:justify-between">
+          <div className="mt-[38px] flex flex-col gap-6 xl:gap-[var(--content-gap)]">
+            <div className="grid grid-cols-1 gap-6 2xl:grid-cols-2">
               <ContentMetricsCard snapshot={currentSnapshot.contentMetrics} />
               <SocialsCard snapshot={currentSnapshot.socials} />
             </div>
@@ -57,8 +57,8 @@ export function PartnerWorkspacePage({ section }: { section: WorkspaceSection })
       return (
         <div className="dashboard-shell">
           <DashboardTopBar snapshot={currentSnapshot.topBar} onPresetChange={setPreset} />
-          <div className="mt-[42px] flex flex-col gap-6 xl:gap-[64px]">
-            <div className="flex flex-col gap-6 2xl:flex-row 2xl:justify-between">
+          <div className="mt-[38px] flex flex-col gap-6 xl:gap-[var(--content-gap)]">
+            <div className="grid grid-cols-1 gap-6 2xl:grid-cols-2">
               <ContractCard snapshot={currentSnapshot.contract} />
               <FinanceCard snapshot={currentSnapshot.finance} />
             </div>
@@ -72,8 +72,8 @@ export function PartnerWorkspacePage({ section }: { section: WorkspaceSection })
     return (
       <div className="dashboard-shell">
         <DashboardTopBar snapshot={currentSnapshot.topBar} onPresetChange={setPreset} />
-        <div className="mt-[42px] flex flex-col gap-6 xl:gap-[64px]">
-          <div className="flex flex-col gap-6 2xl:flex-row 2xl:justify-between">
+        <div className="mt-[38px] flex flex-col gap-6 xl:gap-[var(--content-gap)]">
+          <div className="grid grid-cols-1 gap-6 2xl:grid-cols-2">
             <ProfileCard snapshot={currentSnapshot.profile} />
             <DataCard snapshot={currentSnapshot.partnerData} />
           </div>

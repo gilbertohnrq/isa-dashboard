@@ -23,19 +23,19 @@ export function DashboardView({
   return (
     <div className="dashboard-shell">
       <DashboardTopBar snapshot={snapshot.topBar} onPresetChange={onPresetChange} />
-      <div className="mt-[42px] flex flex-col gap-6 xl:flex-row xl:gap-[61px]">
-        <div className="flex w-full flex-col gap-6 xl:w-[435px] xl:gap-[64px]">
+      <div className="mt-7 flex flex-col gap-5 xl:flex-row xl:gap-[var(--shell-gap)]">
+        <div className="flex w-full flex-col gap-5 xl:w-[var(--sidebar-width)] xl:gap-[var(--sidebar-gap)]">
           <ProfileCard snapshot={snapshot.profile} />
           <LogCard snapshot={snapshot.log} />
         </div>
-        <div className="flex min-w-0 flex-1 flex-col gap-6 xl:w-[1363px] xl:gap-[64px]">
-          <div className="flex flex-col gap-6 2xl:flex-row 2xl:justify-between">
+        <div className="flex min-w-0 flex-1 flex-col gap-5 xl:gap-[var(--content-gap)]">
+          <div className="grid grid-cols-1 gap-5 xl:grid-cols-3 xl:gap-[var(--content-gap)]">
             <ContractCard snapshot={snapshot.contract} />
             <ContentMetricsCard snapshot={snapshot.contentMetrics} />
             <FinanceCard snapshot={snapshot.finance} />
           </div>
           <HoursCard snapshot={snapshot.hours} />
-          <div className="flex flex-col gap-6 2xl:flex-row 2xl:justify-between">
+          <div className="grid grid-cols-1 gap-5 xl:grid-cols-2 xl:gap-[var(--content-gap)]">
             <SocialsCard snapshot={snapshot.socials} />
             <DataCard snapshot={snapshot.partnerData} />
           </div>

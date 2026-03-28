@@ -3,12 +3,12 @@ import { cva } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const chipVariants = cva(
-  "glass-button-shell relative inline-flex h-[26px] min-w-[66px] items-center justify-center rounded-[1000px] px-5 py-1.5 text-center text-[12px] font-[510] text-white",
+  "glass-button-shell relative inline-flex h-[26px] min-w-[66px] items-center justify-center rounded-[1000px] px-4 py-1.5 text-center text-[11px] font-[510] text-white",
   {
     variants: {
       tone: {
-        twitch: "before:bg-[var(--accent-purple)]/50",
-        youtube: "before:bg-[var(--accent-youtube)]/55",
+        twitch: "before:bg-[var(--accent-purple)]/36",
+        youtube: "before:bg-[var(--accent-youtube)]/38",
       },
     },
   },

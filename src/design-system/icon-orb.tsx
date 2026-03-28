@@ -5,11 +5,11 @@ import { cn } from "@/lib/utils";
 
 const orbToneStyles: Record<DashboardOrbTone, string> = {
   neutral:
-    "before:bg-[rgba(17,17,17,0.6)] before:[mix-blend-mode:luminosity] after:bg-[#777] after:[mix-blend-mode:color-dodge] bg-[#222]",
+    "before:bg-white/10 after:bg-[rgba(239,242,255,0.08)]",
   danger:
-    "before:bg-[rgba(17,17,17,0.6)] before:[mix-blend-mode:luminosity] after:bg-[var(--accent-red-soft)] after:[mix-blend-mode:color-dodge] bg-[#222]",
+    "before:bg-[rgba(255,112,133,0.24)] after:bg-[rgba(245,214,220,0.12)]",
   success:
-    "before:bg-[rgba(17,17,17,0.6)] before:[mix-blend-mode:luminosity] after:bg-[var(--accent-green-soft)] after:[mix-blend-mode:color-dodge] bg-[#222]",
+    "before:bg-[rgba(123,210,132,0.24)] after:bg-[rgba(219,245,221,0.12)]",
 };
 
 export function IconOrb({
@@ -38,19 +38,18 @@ export function IconOrb({
   return (
     <div
       className={cn(
-        "relative flex size-[38px] shrink-0 items-center justify-center overflow-hidden rounded-full shadow-[var(--shadow-button)] before:absolute before:inset-0 after:absolute after:inset-0",
+        "relative flex size-[36px] shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/12 bg-white/6 shadow-[var(--shadow-button)] before:absolute before:inset-0 after:absolute after:inset-0",
         orbToneStyles[tone],
         className,
       )}
     >
-      <span className="absolute inset-0 bg-[#222] [mix-blend-mode:plus-lighter]" />
       <Image
         alt={alt}
         width={24}
         height={24}
         src={src}
         unoptimized
-        className={cn("relative z-10 size-6 object-contain", iconClassName)}
+        className={cn("relative z-10 size-5 object-contain", iconClassName)}
       />
     </div>
   );

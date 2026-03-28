@@ -14,18 +14,18 @@ export function NotificationItem({
   iconSrc: string;
 }) {
   return (
-    <GlassPanel className="flex h-[69px] items-center gap-[10px] rounded-[24px] px-[14px] py-3">
-      <Image alt="" width={36} height={40} src={iconSrc} unoptimized className="h-10 w-9" />
+    <GlassPanel className="flex min-h-[50px] items-center gap-2.5 rounded-[18px] px-3 py-2.5">
+      <Image alt="" width={20} height={20} src={iconSrc} unoptimized className="h-5 w-5" />
       <div className="flex min-w-0 flex-1 items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="truncate text-[15px] font-[590] leading-[17px] tracking-[-0.23px]">
+          <p className="truncate text-[13px] font-[590] leading-[15px] tracking-[-0.2px] text-white/96">
             {title}
           </p>
-          <p className="truncate text-[15px] leading-[18px] tracking-[-0.23px] text-white/80">
+          <p className="truncate text-[12px] leading-[15px] tracking-[-0.14px] text-white/76">
             {description}
           </p>
         </div>
-        <p className="shrink-0 text-[15px] leading-[17px] tracking-[-0.23px] text-[#8a8a8a]">
+        <p className="shrink-0 pt-px text-[12px] leading-[15px] tracking-[-0.14px] text-white/42">
           {time}
         </p>
       </div>

@@ -16,10 +16,10 @@ function formatMoney(value: number) {
 
 export function ProfileCard({ snapshot }: { snapshot: PartnerDashboardSnapshot["profile"] }) {
   return (
-    <GlassPanel className="h-[490px] p-[25px]">
+    <GlassPanel className="h-[356px] p-[18px]">
       <h2 className="dashboard-text-title">{snapshot.title}</h2>
-      <div className="mt-5 flex flex-col items-center">
-        <div className="relative size-[349px] overflow-hidden rounded-full">
+      <div className="mt-3 flex flex-col items-center">
+        <div className="relative size-[252px] overflow-hidden rounded-full">
           <Image
             alt={snapshot.name}
             fill
@@ -29,7 +29,7 @@ export function ProfileCard({ snapshot }: { snapshot: PartnerDashboardSnapshot["
           />
           <div className="absolute inset-0 rounded-full border border-white/10 bg-white/4" />
         </div>
-        <div className="glass-button-shell mt-[13px] flex h-[44px] min-w-[89px] items-center justify-center rounded-full px-[17px] text-[24px] font-[590] text-white">
+        <div className="glass-button-shell mt-3 flex h-[34px] min-w-[78px] items-center justify-center rounded-full px-4 text-[16px] font-[590] text-white">
           {snapshot.name}
         </div>
       </div>
@@ -39,22 +39,22 @@ export function ProfileCard({ snapshot }: { snapshot: PartnerDashboardSnapshot["
 
 export function ContractCard({ snapshot }: { snapshot: PartnerDashboardSnapshot["contract"] }) {
   return (
-    <GlassPanel className="h-[259px] w-full p-[25px] 2xl:w-[412px]">
+    <GlassPanel className="h-[184px] w-full p-[18px]">
       <h2 className="dashboard-text-title">{snapshot.title}</h2>
-      <div className="mt-3 flex items-center gap-3">
-        <p className="text-[20px] font-[510] tracking-[-0.2px] text-[var(--text-tertiary)]">
+      <div className="mt-3 flex items-start justify-between gap-3">
+        <p className="max-w-[188px] text-[16px] font-[510] leading-[1.3] tracking-[-0.2px] text-[var(--text-tertiary)]">
           {snapshot.partnerName}
         </p>
-        <span className="glass-button-shell inline-flex h-[26px] items-center rounded-full px-3 text-[12px] text-white">
+        <span className="glass-button-shell mt-0.5 inline-flex h-[24px] shrink-0 items-center rounded-full px-3 text-[11px] text-white">
           {snapshot.alias}
         </span>
       </div>
-      <div className="mt-[43px] flex gap-2">
+      <div className="mt-3 flex flex-wrap gap-2">
         {snapshot.chips.map((chip) => (
           <GlassChip key={chip.label} label={chip.label} tone={chip.tone} />
         ))}
       </div>
-      <div className="mt-3 grid grid-cols-2 gap-x-[25px] gap-y-[14px]">
+      <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2">
         {snapshot.stats.map((stat) => (
           <div key={stat.label} className="flex flex-col">
             <span className="dashboard-text-label">{stat.label}</span>
@@ -72,9 +72,9 @@ export function ContentMetricsCard({
   snapshot: PartnerDashboardSnapshot["contentMetrics"];
 }) {
   return (
-    <GlassPanel className="h-[259px] w-full p-[25px] 2xl:w-[412px]">
+    <GlassPanel className="h-[184px] w-full p-[18px]">
       <h2 className="dashboard-text-title">{snapshot.title}</h2>
-      <div className="mt-[23px] flex items-center justify-center gap-8">
+      <div className="mt-3 flex h-[124px] items-center justify-around gap-2">
         {snapshot.gauges.map((metric) => (
           <GaugeMetric
             key={metric.label}
@@ -91,24 +91,28 @@ export function ContentMetricsCard({
 
 export function FinanceCard({ snapshot }: { snapshot: PartnerDashboardSnapshot["finance"] }) {
   return (
-    <GlassPanel className="h-[259px] w-full p-[25px] 2xl:w-[412px]">
+    <GlassPanel className="h-[184px] w-full p-[18px]">
       <h2 className="dashboard-text-title">{snapshot.title}</h2>
-      <div className="mt-[15px] flex flex-col items-center">
-        <div className="relative flex h-[148px] w-[260px] flex-col items-center justify-center">
+      <div className="mt-3 grid h-[132px] grid-rows-2 gap-1.5">
+        <div className="relative flex min-h-0 w-full min-w-0 flex-col items-center justify-center px-3 text-center">
           <Image
             alt=""
             width={35}
             height={35}
             src="/figma-assets/coin.svg"
-            className="absolute left-[28px] top-[56px] h-[35px] w-[35px]"
+            className="absolute left-2 top-1/2 h-[24px] w-[24px] -translate-y-1/2 sm:left-4 sm:h-[28px] sm:w-[28px]"
             unoptimized
           />
-          <span className="dashboard-number-xl ml-8">{formatMoney(snapshot.cashback)}</span>
-          <span className="mt-3 text-[16px] font-[510] text-white">Cashback TCC</span>
+          <span className="dashboard-number-xl ml-5 text-[32px] sm:text-[40px]">
+            {formatMoney(snapshot.cashback)}
+          </span>
+          <span className="mt-1 text-[13px] font-[510] text-white">Cashback TCC</span>
         </div>
-        <div className="relative mt-[-6px] flex h-[148px] w-[336px] flex-col items-center justify-center">
-          <span className="dashboard-number-xl">R$ {formatMoney(snapshot.money)}</span>
-          <span className="mt-3 text-[16px] font-[510] text-white">Dinheiro</span>
+        <div className="relative flex min-h-0 w-full min-w-0 flex-col items-center justify-center px-3 text-center">
+          <span className="dashboard-number-xl text-[32px] sm:text-[40px]">
+            R$ {formatMoney(snapshot.money)}
+          </span>
+          <span className="mt-1 text-[13px] font-[510] text-white">Dinheiro</span>
         </div>
       </div>
     </GlassPanel>
@@ -117,7 +121,7 @@ export function FinanceCard({ snapshot }: { snapshot: PartnerDashboardSnapshot["
 
 export function HoursCard({ snapshot }: { snapshot: PartnerDashboardSnapshot["hours"] }) {
   return (
-    <GlassPanel className="h-[265px] p-[25px] pb-[10px]">
+    <GlassPanel className="min-h-[188px] p-[18px] pb-2">
       <h2 className="dashboard-text-title">{snapshot.title}</h2>
       <ProgressMetric current={snapshot.current} target={snapshot.target} unit={snapshot.unit} />
     </GlassPanel>
@@ -126,31 +130,28 @@ export function HoursCard({ snapshot }: { snapshot: PartnerDashboardSnapshot["ho
 
 export function SocialsCard({ snapshot }: { snapshot: PartnerDashboardSnapshot["socials"] }) {
   return (
-    <GlassPanel className="h-[265px] w-full p-[25px] 2xl:w-[649px]">
+    <GlassPanel className="h-full min-h-[188px] w-full p-[18px]">
       <h2 className="dashboard-text-title">{snapshot.title}</h2>
-      <div className="mt-[38px] flex items-start justify-between gap-3">
+      <div className="mt-4 grid grid-cols-2 gap-x-3 gap-y-4 sm:grid-cols-3 xl:grid-cols-5">
         {snapshot.items.map((item) => (
-          <div key={item.platform} className="flex w-[90px] flex-col items-center">
+          <div key={item.platform} className="flex min-w-0 flex-col items-center">
             {item.standalone ? (
-              <div className="relative h-[91px] w-[90px]">
+              <div className="relative h-[74px] w-[74px]">
                 <Image alt={item.label} fill src={item.src} className="object-contain" unoptimized />
               </div>
             ) : (
-              <div className="relative flex h-[91px] w-[90px] items-center justify-center overflow-hidden rounded-full bg-white/5 opacity-75">
-                <div className="absolute inset-0 rounded-full bg-[rgba(17,17,17,0.6)] [mix-blend-mode:luminosity]" />
-                <div className="absolute inset-0 rounded-full bg-[#919191] [mix-blend-mode:color-dodge]" />
-                <div className="absolute inset-0 rounded-full bg-[#222] [mix-blend-mode:plus-lighter]" />
+              <div className="relative flex h-[64px] w-[64px] items-center justify-center overflow-hidden rounded-full border border-white/16 bg-[linear-gradient(180deg,rgba(255,255,255,0.2),rgba(255,255,255,0.08)),rgba(235,240,255,0.08)] shadow-[var(--shadow-soft)] backdrop-blur-[18px]">
                 <Image
                   alt={item.label}
                   width={50}
                   height={50}
                   src={item.src}
-                  className="relative z-10 h-[50px] w-[50px] object-contain"
+                  className="relative z-10 h-[32px] w-[32px] object-contain"
                   unoptimized
                 />
               </div>
             )}
-            <span className="mt-4 text-[15px] font-[510] leading-none text-white">{item.label}</span>
+            <span className="mt-2 text-[13px] font-[510] leading-none text-white">{item.label}</span>
             <span className="dashboard-text-detail mt-1">{item.value}</span>
           </div>
         ))}
@@ -161,9 +162,9 @@ export function SocialsCard({ snapshot }: { snapshot: PartnerDashboardSnapshot["
 
 export function DataCard({ snapshot }: { snapshot: PartnerDashboardSnapshot["partnerData"] }) {
   return (
-    <GlassPanel className="h-[265px] w-full p-[25px] 2xl:w-[649px]">
+    <GlassPanel className="h-full min-h-[188px] w-full p-[18px]">
       <h2 className="dashboard-text-title">{snapshot.title}</h2>
-      <div className="mt-[15px] grid grid-cols-3 gap-x-[17px] gap-y-[18px]">
+      <div className="mt-3 grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2 xl:grid-cols-3">
         {snapshot.fields.map((field) => (
           <div key={field.label} className="flex min-w-0 flex-col">
             <span className="dashboard-text-label">{field.label}</span>
@@ -177,9 +178,9 @@ export function DataCard({ snapshot }: { snapshot: PartnerDashboardSnapshot["par
 
 export function LogCard({ snapshot }: { snapshot: PartnerDashboardSnapshot["log"] }) {
   return (
-    <GlassPanel className="h-[475px] p-[25px]">
+    <GlassPanel className="min-h-[330px] p-[18px]">
       <h2 className="dashboard-text-title">{snapshot.title}</h2>
-      <div className="mt-[34px] flex flex-col gap-[23px]">
+      <div className="mt-4 flex flex-col gap-4">
         {snapshot.items.map((item, index) => (
           <NotificationItem
             key={`${item.title}-${index}`}
@@ -196,7 +197,7 @@ export function LogCard({ snapshot }: { snapshot: PartnerDashboardSnapshot["log"
 
 export function Footer({ copyright }: { copyright: string }) {
   return (
-    <footer className="mt-8 flex justify-center xl:mt-[26px]">
+    <footer className="mt-6 flex justify-center xl:mt-5">
       <span className="dashboard-text-detail text-center">{copyright}</span>
     </footer>
   );
