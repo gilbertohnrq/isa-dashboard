@@ -213,6 +213,32 @@ async function resolveTikTokAvatar(handle: string): Promise<string | null> {
   return null;
 }
 
+// ── Image proxy ───────────────────────────────────────────────────────────────
+
+/**
+ * Fetch a remote image and return it as a proxied response.
+ * Avoids ERR_BLOCKED_BY_ORB that happens when the browser follows cross-origin
+ * redirects to CDN URLs that don't include CORS headers (e.g. yt3.googleusercontent.com).
+ */
+async function proxyImage(url: string): Promise<NextResponse | null> {
+  try {
+    const res = await fetch(url, {
+      headers: { "User-Agent": "isa-dashboard/1.0" },
+      signal: AbortSignal.timeout(6000),
+    });
+    if (!res.ok) return null;
+    const contentType = res.headers.get("content-type") ?? "";
+    if (!contentType.startsWith("image/")) return null;
+    const blob = await res.blob();
+    return new NextResponse(blob.stream(), {
+      status: 200,
+      headers: { "Content-Type": contentType, ...CACHE_HEADERS },
+    });
+  } catch {
+    return null;
+  }
+}
+
 // ── Route handler ─────────────────────────────────────────────────────────────
 
 export async function GET(
@@ -242,10 +268,9 @@ export async function GET(
   }
 
   if (resolvedUrl) {
-    return NextResponse.redirect(resolvedUrl, {
-      status: 302,
-      headers: CACHE_HEADERS,
-    });
+    // Proxy the image to avoid ERR_BLOCKED_BY_ORB on cross-origin CDN redirects
+    const proxied = await proxyImage(resolvedUrl);
+    if (proxied) return proxied;
   }
 
   // Last resort: unavatar (only for truly unsupported platforms, e.g. "x", "discord")
@@ -264,10 +289,8 @@ export async function GET(
       if (unavatarRes.status === 302 || unavatarRes.status === 301) {
         const location = unavatarRes.headers.get("location");
         if (location && !location.includes("ui-avatars")) {
-          return NextResponse.redirect(location, {
-            status: 302,
-            headers: CACHE_HEADERS,
-          });
+          const proxied = await proxyImage(location);
+          if (proxied) return proxied;
         }
       }
 
@@ -286,13 +309,13 @@ export async function GET(
     }
   }
 
-  // Ultimate fallback: generated initials avatar
+  // Ultimate fallback: generated initials avatar (proxied to keep same-origin)
   const fallbackUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(
     handle
   )}&background=1a1a2e&color=fff&size=256&bold=true&format=png`;
 
-  return NextResponse.redirect(fallbackUrl, {
-    status: 302,
-    headers: CACHE_HEADERS,
-  });
+  const fallbackProxied = await proxyImage(fallbackUrl);
+  if (fallbackProxied) return fallbackProxied;
+
+  return new NextResponse(null, { status: 404 });
 }
