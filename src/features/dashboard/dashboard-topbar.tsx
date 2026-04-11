@@ -16,7 +16,7 @@ export function DashboardTopBar({
 }) {
   return (
     <header className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex items-center gap-3">
         <StatusPill
           title={snapshot.status.title}
           label={snapshot.status.label}
@@ -44,7 +44,7 @@ export function DashboardTopBar({
           ))}
         </div>
       </div>
-      <div className="flex justify-center xl:flex-1 xl:px-4">
+      <div className="flex justify-center xl:flex-1 xl:px-2">
         <SegmentedStepper
           value={snapshot.activePreset}
           onChange={(preset) => {
@@ -52,7 +52,7 @@ export function DashboardTopBar({
           }}
         />
       </div>
-      <div className="flex flex-wrap items-center justify-end gap-2">
+      <div className="flex items-center justify-end gap-2">
         <div className="glass-button-shell flex h-[36px] items-center rounded-full px-[14px] text-[11px] font-[510] tracking-[-0.08px] text-white">
           <span>{snapshot.dateLabel}</span>
         </div>

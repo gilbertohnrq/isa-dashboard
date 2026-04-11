@@ -45,13 +45,13 @@
   --radius-panel: 28px;
 
   --page-content-width: none;
-  --sidebar-width: 318px;
-  --content-width: 1080px;
-  --top-card-width: 314px;
-  --bottom-card-width: 520px;
-  --content-gap: 20px;
-  --sidebar-gap: 36px;
-  --shell-gap: 36px;
+  --sidebar-width: clamp(280px, 25vw, 435px);
+  --content-width: 1363px;
+  --top-card-width: 412px;
+  --bottom-card-width: 649px;
+  --content-gap: clamp(20px, 4vw, 64px);
+  --sidebar-gap: clamp(20px, 4vw, 64px);
+  --shell-gap: clamp(20px, 3.5vw, 61px);
   --workspace-rail-width: 118px;
   --workspace-gap: 18px;
 }
@@ -176,7 +176,7 @@ button:disabled {
   min-height: 100vh;
   margin: 0 auto;
   min-width: 0;
-  padding: 22px 30px 24px;
+  padding: 30px 30px 20px;
 }
 
 .workspace-sidebar {
