@@ -119,19 +119,22 @@ function buildDirectoryItem(
     sinceLabel: formatSinceLabel(criador.inicio),
     avatarUrl: criador.avatarUrl,
     goals: {
-        liveHours: { realized: criador.horasLive ?? null, target: null },
-        longVideos: { delivered: criador.videosLongos ?? null, target: null },
-        shortVideos: { delivered: criador.videosCurtos ?? null, target: null },
+        // [MOCK] Substituir por dados reais da API futuramente
+        liveHours: { realized: criador.horasLive ?? Math.floor(Math.random() * 80) + 40, target: 120 },
+        longVideos: { delivered: criador.videosLongos ?? Math.floor(Math.random() * 5), target: 5 },
+        shortVideos: { delivered: criador.videosCurtos ?? Math.floor(Math.random() * 10) + 2, target: 15 },
     },
     monthlyInfo: {
-        clicks: null,
-        convertedClicks: null,
-        couponUsageReal: null,
+        // [MOCK] Substituir por dados reais da API futuramente
+        clicks: Math.floor(Math.random() * 2000) + 500,
+        convertedClicks: Math.floor(Math.random() * 500) + 50,
+        couponUsageReal: Math.floor(Math.random() * 800) + 100,
     },
     receivables: {
-        amountReal: { current: criador.valorReais ?? null, contract: null },
-        amountTCC: { current: null, contract: null },
-        cashbackTCC: null,
+        // [MOCK] Substituir por dados reais da API futuramente
+        amountReal: { current: criador.valorReais ?? Math.floor(Math.random() * 600) + 200, contract: (criador.valorReais ?? 500) + Math.floor(Math.random() * 300) },
+        amountTCC: { current: Math.floor(Math.random() * 15000) + 5000, contract: 25000 },
+        cashbackTCC: Math.floor(Math.random() * 5000) + 1000,
     },
     lastActivity: "2 dias atrás",
     notes,
