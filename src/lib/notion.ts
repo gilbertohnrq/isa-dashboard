@@ -89,9 +89,17 @@ function getUsernameFromUrl(url: string | null): string | null {
   try {
     const parsed = new URL(url);
     const segments = parsed.pathname.split("/").filter(Boolean);
+    
+    if (parsed.hostname.includes("youtube.com")) {
+      if (segments[0] === "c" || segments[0] === "user" || segments[0] === "channel") {
+        return normalizeHandle(segments[1] ?? null);
+      }
+    }
+    
     return normalizeHandle(segments[0] ?? null);
   } catch {
-    return null;
+    // If it's not a valid URL, it might be just the raw username/handle natively typed
+    return normalizeHandle(url);
   }
 }
 
@@ -111,13 +119,17 @@ function getAvatarFallback(input: {
   kick: string | null;
   login: string | null;
   nickname: string;
+  nome: string;
 }): string | null {
   return (
-    getUnavatarUrl("twitch", getUsernameFromUrl(input.twitch) ?? input.login ?? input.nickname) ??
-    getUnavatarUrl("instagram", getUsernameFromUrl(input.instagram)) ??
-    getUnavatarUrl("tiktok", getUsernameFromUrl(input.tiktok)) ??
-    getUnavatarUrl("youtube", getUsernameFromUrl(input.youtube)) ??
-    getUnavatarUrl("twitch", getUsernameFromUrl(input.kick)) ??
+    (input.twitch ? getUnavatarUrl("twitch", getUsernameFromUrl(input.twitch)) : null) ??
+    (input.youtube ? getUnavatarUrl("youtube", getUsernameFromUrl(input.youtube)) : null) ??
+    (input.instagram ? getUnavatarUrl("instagram", getUsernameFromUrl(input.instagram)) : null) ??
+    (input.tiktok ? getUnavatarUrl("tiktok", getUsernameFromUrl(input.tiktok)) : null) ??
+    (input.kick ? getUnavatarUrl("kick", getUsernameFromUrl(input.kick)) : null) ??
+    (input.login ? getUnavatarUrl("twitch", input.login) : null) ??
+    (input.nickname ? getUnavatarUrl("twitch", input.nickname) : null) ??
+    (input.nome ? getUnavatarUrl("twitch", input.nome) : null) ??
     null
   );
 }
@@ -239,6 +251,7 @@ export async function getCriadores(): Promise<Criador[]> {
           kick,
           login,
           nickname,
+          nome: text(p["Nome"]) || nickname,
         }) ??
         null,
       possuiWebcam: checkbox(p["Possui Webcam?"]),

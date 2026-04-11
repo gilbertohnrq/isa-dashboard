@@ -236,18 +236,18 @@ export function CreatorDirectory({ items }: { items: CreatorDirectoryItem[] }) {
                     {/* Body: Avatar e Metas na mesma linha */}
                     <div className="flex items-center gap-4 mb-3 rounded bg-white/[0.015] p-2 ring-1 ring-white/5">
                       {/* Left: Identity */}
-                      <div className="flex flex-col items-center justify-center w-[72px] shrink-0">
+                      <div className="flex flex-col items-center justify-center w-[84px] shrink-0">
                         <CreatorAvatar
                           name={item.name}
                           initials={item.initials}
                           src={item.avatarUrl}
-                          className="size-[48px] mb-1.5 ring-1 ring-white/10"
-                          fallbackClassName="text-[16px] font-semibold tracking-[0.1em]"
+                          className="size-[56px] mb-2 ring-1 ring-white/10"
+                          fallbackClassName="text-[18px] font-semibold tracking-[0.1em]"
                         />
-                        <p className="w-full truncate text-[11px] font-semibold tracking-[-0.04em] text-white text-center leading-tight">
+                        <p className="w-full truncate text-[13px] font-semibold tracking-[-0.04em] text-white text-center leading-tight">
                           {item.name}
                         </p>
-                        <p className="w-full truncate text-[9px] text-white/52 text-center">@{item.nickname}</p>
+                        <p className="w-full truncate text-[11px] text-white/52 text-center mt-0.5">@{item.nickname}</p>
                       </div>
 
                       {/* Right: Goals Bars */}
@@ -256,13 +256,13 @@ export function CreatorDirectory({ items }: { items: CreatorDirectoryItem[] }) {
                           
                           <div className="flex items-center gap-2">
                             <div title="Horas de Live" className="shrink-0">
-                               <svg className="size-3.5 text-red-400 cursor-help" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+                               <svg className="size-[16px] text-red-400 cursor-help" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
                             </div>
                             <div className="flex-1 flex items-center gap-2">
                                <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden">
                                   <div className="h-full bg-red-400 rounded-full transition-all duration-500" style={{ width: `${Math.min(100, ((item.goals.liveHours?.realized ?? 0) / (item.goals.liveHours?.target || 1)) * 100)}%` }}></div>
                                </div>
-                               <span className="shrink-0 text-[10px] font-semibold text-white leading-none min-w-[34px] text-right">
+                               <span className="shrink-0 text-[12px] font-semibold text-white leading-none min-w-[42px] text-right">
                                  {item.goals.liveHours?.realized ?? 0}<span className="text-white/40 font-normal">/{item.goals.liveHours?.target || 0}h</span>
                                </span>
                             </div>
@@ -270,13 +270,13 @@ export function CreatorDirectory({ items }: { items: CreatorDirectoryItem[] }) {
 
                           <div className="flex items-center gap-2">
                             <div title="Vídeos Longos" className="shrink-0">
-                               <svg className="size-3.5 text-blue-400 cursor-help" fill="currentColor" viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-3.5V17H5V7h2v3.5l5-3.5v10zm7 0h-2V7h2v10z"/></svg>
+                               <svg className="size-[16px] text-blue-400 cursor-help" fill="currentColor" viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-3.5V17H5V7h2v3.5l5-3.5v10zm7 0h-2V7h2v10z"/></svg>
                             </div>
                             <div className="flex-1 flex items-center gap-2">
                                <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden">
                                   <div className="h-full bg-blue-400 rounded-full transition-all duration-500" style={{ width: `${Math.min(100, ((item.goals.longVideos?.delivered ?? 0) / (item.goals.longVideos?.target || 1)) * 100)}%` }}></div>
                                </div>
-                               <span className="shrink-0 text-[10px] font-semibold text-white leading-none min-w-[34px] text-right">
+                               <span className="shrink-0 text-[12px] font-semibold text-white leading-none min-w-[42px] text-right">
                                  {item.goals.longVideos?.delivered ?? 0}<span className="text-white/40 font-normal">/{item.goals.longVideos?.target || 0}</span>
                                </span>
                             </div>
@@ -284,13 +284,13 @@ export function CreatorDirectory({ items }: { items: CreatorDirectoryItem[] }) {
 
                           <div className="flex items-center gap-2">
                             <div title="Vídeos Curtos" className="shrink-0">
-                               <svg className="size-3.5 text-purple-400 cursor-help" fill="currentColor" viewBox="0 0 24 24"><path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/></svg>
+                               <svg className="size-[16px] text-purple-400 cursor-help" fill="currentColor" viewBox="0 0 24 24"><path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/></svg>
                             </div>
                             <div className="flex-1 flex items-center gap-2">
                                <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden">
                                   <div className="h-full bg-purple-400 rounded-full transition-all duration-500" style={{ width: `${Math.min(100, ((item.goals.shortVideos?.delivered ?? 0) / (item.goals.shortVideos?.target || 1)) * 100)}%` }}></div>
                                </div>
-                               <span className="shrink-0 text-[10px] font-semibold text-white leading-none min-w-[34px] text-right">
+                               <span className="shrink-0 text-[12px] font-semibold text-white leading-none min-w-[42px] text-right">
                                  {item.goals.shortVideos?.delivered ?? 0}<span className="text-white/40 font-normal">/{item.goals.shortVideos?.target || 0}</span>
                                </span>
                             </div>
@@ -309,24 +309,24 @@ export function CreatorDirectory({ items }: { items: CreatorDirectoryItem[] }) {
                       {item.receivables && (
                       <div className="flex gap-2">
                         <div className="flex-1 rounded bg-white/[0.02] p-2.5 ring-1 ring-white/5 flex flex-col justify-center">
-                            <span className="text-[9px] text-white/40 uppercase font-medium tracking-wider mb-1">R$ base</span>
+                            <span className="text-[11px] text-white/40 uppercase font-medium tracking-wider mb-1">R$ base</span>
                             <div className="flex items-baseline gap-1 mb-2">
-                              <span className="text-[13px] font-bold text-emerald-400 leading-none">
+                              <span className="text-[15px] font-bold text-emerald-400 leading-none">
                                 {item.receivables?.amountReal?.current != null ? item.receivables.amountReal.current.toLocaleString("pt-BR") : "-"}
                               </span>
-                              <span className="text-[9px] text-emerald-400/50 font-normal">/ {item.receivables?.amountReal?.contract != null ? item.receivables.amountReal.contract.toLocaleString("pt-BR") : "-"}</span>
+                              <span className="text-[11px] text-emerald-400/50 font-normal">/ {item.receivables?.amountReal?.contract != null ? item.receivables.amountReal.contract.toLocaleString("pt-BR") : "-"}</span>
                             </div>
                             <div className="h-1 w-full bg-black/40 rounded-full overflow-hidden">
                              <div className="h-full bg-emerald-400 rounded-full transition-all duration-500" style={{ width: `${Math.min(100, ((item.receivables?.amountReal?.current ?? 0) / (item.receivables?.amountReal?.contract || 1)) * 100)}%` }}></div>
                             </div>
                         </div>
                         <div className="flex-1 rounded bg-white/[0.02] p-2.5 ring-1 ring-white/5 flex flex-col justify-center">
-                            <span className="text-[9px] text-white/40 uppercase font-medium tracking-wider mb-1">TCC</span>
+                            <span className="text-[11px] text-white/40 uppercase font-medium tracking-wider mb-1">TCC</span>
                             <div className="flex items-baseline gap-1 mb-2">
-                              <span className="text-[13px] font-bold text-amber-400 leading-none">
+                              <span className="text-[15px] font-bold text-amber-400 leading-none">
                                 {item.receivables?.amountTCC?.current != null ? item.receivables.amountTCC.current.toLocaleString("pt-BR") : "-"}
                               </span>
-                              <span className="text-[9px] text-amber-400/50 font-normal">/ {item.receivables?.amountTCC?.contract != null ? item.receivables.amountTCC.contract.toLocaleString("pt-BR") : "-"}</span>
+                              <span className="text-[11px] text-amber-400/50 font-normal">/ {item.receivables?.amountTCC?.contract != null ? item.receivables.amountTCC.contract.toLocaleString("pt-BR") : "-"}</span>
                             </div>
                             <div className="h-1 w-full bg-black/40 rounded-full overflow-hidden">
                              <div className="h-full bg-amber-400 rounded-full transition-all duration-500" style={{ width: `${Math.min(100, ((item.receivables?.amountTCC?.current ?? 0) / (item.receivables?.amountTCC?.contract || 1)) * 100)}%` }}></div>
