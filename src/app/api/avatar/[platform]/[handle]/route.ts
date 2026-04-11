@@ -6,7 +6,9 @@ const CACHE_HEADERS = {
 };
 
 const FETCH_OPTS = {
-  next: { revalidate: 86400 },
+  // No next.revalidate here — the HTTP Cache-Control response header handles
+  // caching at the CDN/browser level. Using next.revalidate in route handlers
+  // can persist null results across restarts, masking rate-limit failures.
   headers: { "User-Agent": "isa-dashboard/1.0" },
 } as const;
 
@@ -33,12 +35,34 @@ function extractOgImage(html: string): string | null {
   return null;
 }
 
-// ── Twitch (DecAPI — free, no rate limit) ────────────────────────────────────
+// ── Twitch ────────────────────────────────────────────────────────────────────
 
-async function resolveTwitchAvatar(handle: string): Promise<string | null> {
+/**
+ * IVR API — free Twitch data proxy, no key required.
+ * Returns high-res profile image (600×600).
+ */
+async function tryIvrTwitch(handle: string): Promise<string | null> {
+  try {
+    const res = await fetch(
+      `https://api.ivr.fi/v2/twitch/user?login=${encodeURIComponent(handle)}`,
+      { ...FETCH_OPTS, signal: AbortSignal.timeout(4000) },
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    const logo: string | undefined = Array.isArray(data) ? data[0]?.logo : data?.logo;
+    if (logo?.startsWith("http")) return logo;
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
+/** DecAPI — lightweight text endpoint. */
+async function tryDecApiTwitch(handle: string): Promise<string | null> {
   try {
     const res = await fetch(`https://decapi.me/twitch/avatar/${handle}`, {
       ...FETCH_OPTS,
+      signal: AbortSignal.timeout(4000),
     });
     if (!res.ok) return null;
     const url = (await res.text()).trim();
@@ -47,6 +71,10 @@ async function resolveTwitchAvatar(handle: string): Promise<string | null> {
     // ignore
   }
   return null;
+}
+
+async function resolveTwitchAvatar(handle: string): Promise<string | null> {
+  return (await tryIvrTwitch(handle)) ?? (await tryDecApiTwitch(handle));
 }
 
 // ── YouTube ───────────────────────────────────────────────────────────────────
