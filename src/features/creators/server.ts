@@ -82,6 +82,24 @@ function buildDirectoryItem(
 
   const displayName = getDisplayName(criador);
   const status = criador.situacao ?? "Sem status";
+  const tierNum = criador.tier ?? 3;
+
+  let notes: string[] = [];
+  if (criador.nickname === "Isa" || criador.nome === "Isa") {
+    notes = [
+      "Treino/Ensaio antes das lives",
+      "Separar melhor o roteiro",
+      "Jairo não pode ler o chat, desestabiliza/desconcentra ele",
+      "Vamos fazer isso após o Jairo estar 100% na TCG",
+    ];
+  } else if (criador.nickname === "Jhonatan" || criador.nome === "Jhonatan") {
+    notes = [
+      "Inicia às 10h",
+      "Período da Tarde até 20h",
+    ];
+  }
+
+  const stars = tierNum === 1 ? 5 : tierNum === 2 ? 4 : 3;
 
   return {
     id: String(criador.theClassicId),
@@ -92,12 +110,31 @@ function buildDirectoryItem(
     status,
     statusTone: getStatusTone(criador.situacao),
     tierLabel: formatTierLabel(criador.tier),
+    tierNum,
+    stars,
     content: criador.conteudo || "Conteúdo não informado",
     projects: criador.projeto,
     platforms: criador.plataformas,
     amountLabel: formatAmountLabel(criador.valorReais),
     sinceLabel: formatSinceLabel(criador.inicio),
     avatarUrl: criador.avatarUrl,
+    goals: {
+        liveHours: { realized: criador.horasLive ?? null, target: null },
+        longVideos: { delivered: criador.videosLongos ?? null, target: null },
+        shortVideos: { delivered: criador.videosCurtos ?? null, target: null },
+    },
+    monthlyInfo: {
+        clicks: null,
+        convertedClicks: null,
+        couponUsageReal: null,
+    },
+    receivables: {
+        amountReal: { current: criador.valorReais ?? null, contract: null },
+        amountTCC: { current: null, contract: null },
+        cashbackTCC: null,
+    },
+    lastActivity: "2 dias atrás",
+    notes,
   };
 }
 

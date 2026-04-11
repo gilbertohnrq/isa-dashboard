@@ -100,7 +100,7 @@ function getUnavatarUrl(platform: string, handle: string | null): string | null 
 
   if (!normalized) return null;
 
-  return `https://unavatar.io/${platform}/${encodeURIComponent(normalized)}`;
+  return `/api/avatar/${platform}/${encodeURIComponent(normalized)}`;
 }
 
 function getAvatarFallback(input: {
