@@ -5,17 +5,21 @@ import { useQuery } from "@tanstack/react-query";
 
 import { useDashboardStore } from "@/features/dashboard/dashboard-store";
 import { useDashboardStream } from "@/hooks/use-dashboard-stream";
-import { fetchDashboardSnapshot } from "@/services/dashboard-service";
+import { fetchCriadorSnapshot, fetchDashboardSnapshot } from "@/services/dashboard-service";
 
-export function useDashboardSnapshot() {
+export function useDashboardSnapshot(criadorId?: string) {
   const preset = useDashboardStore((state) => state.preset);
   const syncSnapshotState = useDashboardStore((state) => state.syncSnapshotState);
   const setPreset = useDashboardStore((state) => state.setPreset);
   const deferredPreset = useDeferredValue(preset);
 
   const query = useQuery({
-    queryKey: ["dashboard-snapshot", deferredPreset],
-    queryFn: () => fetchDashboardSnapshot(deferredPreset),
+    queryKey: criadorId
+      ? ["criador-snapshot", criadorId]
+      : ["dashboard-snapshot", deferredPreset],
+    queryFn: criadorId
+      ? () => fetchCriadorSnapshot(criadorId)
+      : () => fetchDashboardSnapshot(deferredPreset),
   });
 
   useEffect(() => {
@@ -29,7 +33,7 @@ export function useDashboardSnapshot() {
     });
   }, [query.data, syncSnapshotState]);
 
-  useDashboardStream(query.data);
+  useDashboardStream(criadorId ? undefined : query.data);
 
   return {
     snapshot: query.data,

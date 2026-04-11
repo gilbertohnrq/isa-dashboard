@@ -19,8 +19,14 @@ import { useDashboardSnapshot } from "@/hooks/use-dashboard-snapshot";
 
 export type WorkspaceSection = "dashboard" | "conteudos" | "financeiro" | "dados";
 
-export function PartnerWorkspacePage({ section }: { section: WorkspaceSection }) {
-  const { snapshot, isLoading, setPreset } = useDashboardSnapshot();
+export function PartnerWorkspacePage({
+  section,
+  criadorId,
+}: {
+  section: WorkspaceSection;
+  criadorId?: string;
+}) {
+  const { snapshot, isLoading, setPreset } = useDashboardSnapshot(criadorId);
 
   if (isLoading || !snapshot) {
     return (
