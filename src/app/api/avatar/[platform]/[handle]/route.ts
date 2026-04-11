@@ -79,7 +79,7 @@ async function scrapeYouTubePage(handle: string): Promise<string | null> {
 
       // ytInitialData thumbnail thumbnails array
       const ytMatch = html.match(
-        /"avatar":\s*\{"thumbnails":\s*\[.*?"url":\s*"(https:[^"]+)"/s
+        /"avatar":\s*\{"thumbnails":\s*\[[\s\S]*?"url":\s*"(https:[^"]+)"/
       );
       if (ytMatch?.[1]) return ytMatch[1];
     } catch {

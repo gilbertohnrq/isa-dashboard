@@ -111,6 +111,23 @@ function getUnavatarUrl(platform: string, handle: string | null): string | null 
   return `/api/avatar/${platform}/${encodeURIComponent(normalized)}`;
 }
 
+// YouTube CDN URLs (yt3.googleusercontent.com) are blocked by ORB when loaded
+// directly in the browser. Route them through our server-side proxy instead.
+const YT_CDN_HOSTS = ["yt3.googleusercontent.com", "yt3.ggpht.com"];
+
+function proxyYoutubeCdnUrl(url: string | null): string | null {
+  if (!url) return null;
+  try {
+    const host = new URL(url).hostname;
+    if (YT_CDN_HOSTS.some((h) => host === h || host.endsWith(`.${h}`))) {
+      return `/api/proxy-image?url=${encodeURIComponent(url)}`;
+    }
+  } catch {
+    // not a valid URL, return as-is
+  }
+  return url;
+}
+
 function getAvatarFallback(input: {
   twitch: string | null;
   instagram: string | null;
@@ -236,24 +253,26 @@ export async function getCriadores(): Promise<Criador[]> {
         urlProp(p["twitter"]),
       discord: text(p["Discord"]) || null,
       avatarUrl:
-        getNotionFileUrl(page.cover ?? null) ??
-        filesUrl(p["Avatar"]) ??
-        filesUrl(p["Foto"]) ??
-        filesUrl(p["Foto de Perfil"]) ??
-        filesUrl(p["Imagem"]) ??
-        urlProp(p["Avatar"]) ??
-        urlProp(p["Foto"]) ??
-        getAvatarFallback({
-          twitch,
-          instagram,
-          tiktok,
-          youtube,
-          kick,
-          login,
-          nickname,
-          nome: text(p["Nome"]) || nickname,
-        }) ??
-        null,
+        proxyYoutubeCdnUrl(
+          getNotionFileUrl(page.cover ?? null) ??
+          filesUrl(p["Avatar"]) ??
+          filesUrl(p["Foto"]) ??
+          filesUrl(p["Foto de Perfil"]) ??
+          filesUrl(p["Imagem"]) ??
+          urlProp(p["Avatar"]) ??
+          urlProp(p["Foto"]) ??
+          getAvatarFallback({
+            twitch,
+            instagram,
+            tiktok,
+            youtube,
+            kick,
+            login,
+            nickname,
+            nome: text(p["Nome"]) || nickname,
+          }) ??
+          null
+        ),
       possuiWebcam: checkbox(p["Possui Webcam?"]),
       cadastrado: checkbox(p["Cadastrado?"]),
     };
