@@ -4,48 +4,68 @@ export const notion = new Client({
   auth: process.env.NOTION_TOKEN,
 });
 
+// ── internal types ────────────────────────────────────────────────────────────
+
+type NotionProp = Record<string, unknown>;
+type NotionPage = { id: string; properties: Record<string, NotionProp> };
+type QueryResult = { results: NotionPage[]; has_more: boolean; next_cursor: string | null };
+type DataSources = { query: (args: Record<string, unknown>) => Promise<QueryResult> };
+
 // ── helpers ──────────────────────────────────────────────────────────────────
 
-function text(prop: any): string {
-  return prop?.rich_text?.[0]?.plain_text ?? prop?.title?.[0]?.plain_text ?? "";
+function text(prop: NotionProp | undefined): string {
+  if (!prop) return "";
+  const rt = prop.rich_text as Array<{ plain_text: string }> | undefined;
+  const title = prop.title as Array<{ plain_text: string }> | undefined;
+  return rt?.[0]?.plain_text ?? title?.[0]?.plain_text ?? "";
 }
 
-function num(prop: any): number | null {
-  return prop?.number ?? null;
+function num(prop: NotionProp | undefined): number | null {
+  if (!prop) return null;
+  return typeof prop.number === "number" ? prop.number : null;
 }
 
-function select(prop: any): string | null {
-  return prop?.select?.name ?? null;
+function select(prop: NotionProp | undefined): string | null {
+  if (!prop) return null;
+  const s = prop.select as { name: string } | null | undefined;
+  return s?.name ?? null;
 }
 
-function multiSelect(prop: any): string[] {
-  return prop?.multi_select?.map((s: any) => s.name) ?? [];
+function multiSelect(prop: NotionProp | undefined): string[] {
+  if (!prop) return [];
+  const ms = prop.multi_select as Array<{ name: string }> | undefined;
+  return ms?.map((s) => s.name) ?? [];
 }
 
-function url(prop: any): string | null {
-  return prop?.url ?? null;
+function urlProp(prop: NotionProp | undefined): string | null {
+  if (!prop) return null;
+  return typeof prop.url === "string" ? prop.url : null;
 }
 
-function date(prop: any): string | null {
-  return prop?.date?.start ?? null;
+function dateProp(prop: NotionProp | undefined): string | null {
+  if (!prop) return null;
+  const d = prop.date as { start: string } | null | undefined;
+  return d?.start ?? null;
 }
 
-function checkbox(prop: any): boolean {
-  return prop?.checkbox ?? false;
+function checkbox(prop: NotionProp | undefined): boolean {
+  if (!prop) return false;
+  return prop.checkbox === true;
 }
 
-async function queryAll(dataSourceId: string) {
-  const results: any[] = [];
+async function queryAll(dataSourceId: string): Promise<NotionPage[]> {
+  const results: NotionPage[] = [];
   let cursor: string | undefined;
+  const ds = (notion.dataSources as unknown as DataSources);
 
   do {
-    const res: any = await (notion.dataSources as any).query({
+    const res = await ds.query({
       data_source_id: dataSourceId,
       page_size: 100,
       ...(cursor ? { start_cursor: cursor } : {}),
     });
     results.push(...res.results);
-    cursor = res.has_more ? res.next_cursor : undefined;
+    cursor = res.has_more && res.next_cursor ? res.next_cursor : undefined;
   } while (cursor);
 
   return results;
@@ -80,7 +100,7 @@ export type Criador = {
 export async function getCriadores(): Promise<Criador[]> {
   const pages = await queryAll(process.env.NOTION_CRIADORES_DB_ID!);
 
-  return pages.map((page: any) => {
+  return pages.map((page) => {
     const p = page.properties;
     return {
       id: page.id,
@@ -95,12 +115,12 @@ export async function getCriadores(): Promise<Criador[]> {
       videosLongos: num(p["Vídeos Longos"]),
       videosCurtos: num(p["Vídeos Curtos"]),
       valorReais: num(p["Valor (R$)"]),
-      inicio: date(p["Início"]),
+      inicio: dateProp(p["Início"]),
       theClassicId: num(p["TheClassic ID"]),
-      twitch: url(p["Twitch"]),
-      youtube: url(p["Youtube"]),
-      tiktok: url(p["TikTok"]),
-      kick: url(p["Kick"]),
+      twitch: urlProp(p["Twitch"]),
+      youtube: urlProp(p["Youtube"]),
+      tiktok: urlProp(p["TikTok"]),
+      kick: urlProp(p["Kick"]),
       discord: text(p["Discord"]) || null,
       possuiWebcam: checkbox(p["Possui Webcam?"]),
       cadastrado: checkbox(p["Cadastrado?"]),
@@ -125,7 +145,7 @@ export async function getEntregas(): Promise<Entrega[]> {
 
   try {
     const pages = await queryAll(process.env.NOTION_ENTREGAS_DB_ID);
-    return pages.map((page: any) => {
+    return pages.map((page) => {
       const p = page.properties;
       return {
         id: page.id,
@@ -133,7 +153,7 @@ export async function getEntregas(): Promise<Entrega[]> {
         criador: text(p["Criador"]) || select(p["Criador"]) || null,
         tipo: select(p["Tipo"]) || null,
         status: select(p["Status"]) || select(p["Situação"]) || null,
-        dataEntrega: date(p["Data de Entrega"] ?? p["Data"]) || null,
+        dataEntrega: dateProp(p["Data de Entrega"] ?? p["Data"]) || null,
         projeto: multiSelect(p["Projeto"]),
       };
     });
@@ -158,7 +178,7 @@ export async function getResumos(): Promise<ResumoMes[]> {
 
   try {
     const pages = await queryAll(process.env.NOTION_RESUMO_DB_ID);
-    return pages.map((page: any) => {
+    return pages.map((page) => {
       const p = page.properties;
       return {
         id: page.id,
