@@ -1,65 +1,139 @@
-import Image from "next/image";
+import { getCriadores, type Criador } from "@/lib/notion";
 
-export default function Home() {
+const situacaoCor: Record<string, string> = {
+  Ativo: "bg-green-100 text-green-800",
+  Inativo: "bg-red-100 text-red-800",
+  Pausado: "bg-yellow-100 text-yellow-800",
+};
+
+function PlataformaIcon({ nome }: { nome: string }) {
+  const icons: Record<string, string> = {
+    Twitch: "🟣",
+    Youtube: "🔴",
+    TikTok: "⚫",
+    Kick: "🟢",
+    Facebook: "🔵",
+  };
+  return <span title={nome}>{icons[nome] ?? "🌐"} {nome}</span>;
+}
+
+function CriadorCard({ c }: { c: Criador }) {
+  const links = [
+    c.twitch && { label: "Twitch", href: c.twitch },
+    c.youtube && { label: "YouTube", href: c.youtube },
+    c.tiktok && { label: "TikTok", href: c.tiktok },
+    c.kick && { label: "Kick", href: c.kick },
+  ].filter(Boolean) as { label: string; href: string }[];
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm flex flex-col gap-3">
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <h2 className="text-lg font-semibold text-zinc-900">
+            {c.nickname || c.nome}
+          </h2>
+          {c.nomeCompleto && (
+            <p className="text-sm text-zinc-500">{c.nomeCompleto}</p>
+          )}
+        </div>
+        {c.situacao && (
+          <span
+            className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${
+              situacaoCor[c.situacao] ?? "bg-zinc-100 text-zinc-700"
+            }`}
+          >
+            {c.situacao}
+          </span>
+        )}
+      </div>
+
+      {c.plataformas.length > 0 && (
+        <div className="flex flex-wrap gap-2 text-sm text-zinc-600">
+          {c.plataformas.map((p) => (
+            <PlataformaIcon key={p} nome={p} />
+          ))}
+        </div>
+      )}
+
+      {c.conteudo && (
+        <p className="text-sm text-zinc-500">{c.conteudo}</p>
+      )}
+
+      <div className="grid grid-cols-3 gap-2 rounded-xl bg-zinc-50 p-3 text-center text-sm">
+        <div>
+          <p className="font-semibold text-zinc-900">{c.horasLive ?? "—"}</p>
+          <p className="text-xs text-zinc-500">Horas live</p>
+        </div>
+        <div>
+          <p className="font-semibold text-zinc-900">{c.videosLongos ?? "—"}</p>
+          <p className="text-xs text-zinc-500">Vídeos longos</p>
+        </div>
+        <div>
+          <p className="font-semibold text-zinc-900">{c.videosCurtos ?? "—"}</p>
+          <p className="text-xs text-zinc-500">Vídeos curtos</p>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between">
+        {c.valorReais != null ? (
+          <p className="text-sm font-medium text-zinc-700">
+            R$ {c.valorReais.toFixed(2)}
           </p>
+        ) : <span />}
+        {c.projeto.length > 0 && (
+          <div className="flex gap-1">
+            {c.projeto.map((proj) => (
+              <span
+                key={proj}
+                className="rounded bg-zinc-100 px-2 py-0.5 text-xs text-zinc-600"
+              >
+                {proj}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {links.length > 0 && (
+        <div className="flex flex-wrap gap-2 border-t border-zinc-100 pt-3">
+          {links.map((l) => (
+            <a
+              key={l.label}
+              href={l.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-blue-600 hover:underline"
+            >
+              {l.label} ↗
+            </a>
+          ))}
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      )}
     </div>
+  );
+}
+
+export default async function Home() {
+  const criadores = await getCriadores();
+
+  return (
+    <main className="min-h-screen bg-zinc-50 px-4 py-10">
+      <div className="mx-auto max-w-5xl">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-zinc-900">Criadores Parceiros</h1>
+          <p className="mt-1 text-zinc-500">{criadores.length} criadores cadastrados</p>
+        </div>
+
+        {criadores.length === 0 ? (
+          <p className="text-zinc-400">Nenhum criador encontrado.</p>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {criadores.map((c) => (
+              <CriadorCard key={c.id} c={c} />
+            ))}
+          </div>
+        )}
+      </div>
+    </main>
   );
 }
