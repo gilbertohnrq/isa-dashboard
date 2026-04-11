@@ -6,6 +6,7 @@ export type DashboardSocialPlatform =
   | "twitch"
   | "youtube"
   | "tiktok"
+  | "kick"
   | "instagram"
   | "x";
 
@@ -29,14 +30,16 @@ export type DashboardTopBar = {
     label: string;
     tone: DashboardStatusTone;
   };
-  actions: DashboardTopBarAction[];
-  activePreset: DashboardPreset;
+  actions?: DashboardTopBarAction[];
+  activePreset?: DashboardPreset;
   dateLabel: string;
   timeLabel?: string;
   liveEnabled: boolean;
   periodMode: DashboardPeriodMode;
   gameLogoSrc: string;
-  discordLogoSrc: string;
+  discordLogoSrc?: string;
+  heading: string;
+  subtitle: string;
 };
 
 export type DashboardContractStat = {
@@ -59,12 +62,15 @@ export type DashboardGaugeMetric = {
   label: string;
   value: number;
   max: number;
+  hasData?: boolean;
 };
 
 export type DashboardFinance = {
   title: string;
   cashback: number;
   money: number;
+  hasCashbackData?: boolean;
+  hasMoneyData?: boolean;
 };
 
 export type DashboardHoursProgress = {
@@ -72,14 +78,18 @@ export type DashboardHoursProgress = {
   current: number;
   target: number;
   unit: string;
+  hasData?: boolean;
 };
 
 export type DashboardSocialMetric = {
   platform: DashboardSocialPlatform;
   label: string;
   value: string;
-  src: string;
+  src?: string;
   standalone?: boolean;
+  monogram?: string;
+  href?: string | null;
+  isAvailable?: boolean;
 };
 
 export type DashboardDataField = {
@@ -96,10 +106,13 @@ export type DashboardLogItem = {
 
 export type PartnerDashboardSnapshot = {
   preset: DashboardPreset;
+  creatorId: string;
   profile: {
     title: string;
     name: string;
-    imageSrc: string;
+    subtitle?: string;
+    imageSrc?: string | null;
+    initials?: string;
   };
   topBar: DashboardTopBar;
   contract: DashboardContract;
@@ -107,12 +120,14 @@ export type PartnerDashboardSnapshot = {
     title: string;
     accentTone: DashboardStatusTone;
     gauges: DashboardGaugeMetric[];
+    emptyMessage?: string;
   };
   finance: DashboardFinance;
   hours: DashboardHoursProgress;
   socials: {
     title: string;
     items: DashboardSocialMetric[];
+    emptyMessage?: string;
   };
   partnerData: {
     title: string;
@@ -121,6 +136,7 @@ export type PartnerDashboardSnapshot = {
   log: {
     title: string;
     items: DashboardLogItem[];
+    emptyMessage?: string;
   };
   footer: string;
 };

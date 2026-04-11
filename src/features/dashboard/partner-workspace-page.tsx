@@ -1,5 +1,3 @@
-"use client";
-
 import {
   ContentMetricsCard,
   ContractCard,
@@ -11,82 +9,80 @@ import {
   ProfileCard,
   SocialsCard,
 } from "@/features/dashboard/dashboard-cards";
-import { DashboardSkeleton } from "@/features/dashboard/dashboard-skeleton";
 import { DashboardTopBar } from "@/features/dashboard/dashboard-topbar";
 import { DashboardView } from "@/features/dashboard/dashboard-view";
+import type { PartnerDashboardSnapshot } from "@/features/dashboard/types";
+import { getCreatorSectionLinks } from "@/features/creators/server";
+import type { CreatorSection } from "@/features/creators/types";
 import { WorkspaceFrame } from "@/features/navigation/workspace-frame";
-import { useDashboardSnapshot } from "@/hooks/use-dashboard-snapshot";
-
-export type WorkspaceSection = "dashboard" | "conteudos" | "financeiro" | "dados";
 
 export function PartnerWorkspacePage({
   section,
   criadorId,
+  snapshot,
 }: {
-  section: WorkspaceSection;
-  criadorId?: string;
+  section: CreatorSection;
+  criadorId: string;
+  snapshot: PartnerDashboardSnapshot;
 }) {
-  const { snapshot, isLoading, setPreset } = useDashboardSnapshot(criadorId);
+  const navigation = getCreatorSectionLinks(criadorId, section);
 
-  if (isLoading || !snapshot) {
-    return (
-      <WorkspaceFrame>
-        <DashboardSkeleton />
-      </WorkspaceFrame>
-    );
-  }
-
-  return <WorkspaceFrame>{renderSection(snapshot)}</WorkspaceFrame>;
-
-  function renderSection(currentSnapshot: NonNullable<typeof snapshot>) {
-    if (section === "dashboard") {
-      return <DashboardView snapshot={currentSnapshot} onPresetChange={setPreset} />;
-    }
-
-    if (section === "conteudos") {
-      return (
-        <div className="dashboard-shell">
-          <DashboardTopBar snapshot={currentSnapshot.topBar} onPresetChange={setPreset} />
-          <div className="mt-[38px] flex flex-col gap-6 xl:gap-[var(--content-gap)]">
-            <div className="grid grid-cols-1 gap-6 2xl:grid-cols-2">
-              <ContentMetricsCard snapshot={currentSnapshot.contentMetrics} />
-              <SocialsCard snapshot={currentSnapshot.socials} />
-            </div>
-            <HoursCard snapshot={currentSnapshot.hours} />
-          </div>
-          <Footer copyright={currentSnapshot.footer} />
-        </div>
-      );
-    }
-
-    if (section === "financeiro") {
-      return (
-        <div className="dashboard-shell">
-          <DashboardTopBar snapshot={currentSnapshot.topBar} onPresetChange={setPreset} />
-          <div className="mt-[38px] flex flex-col gap-6 xl:gap-[var(--content-gap)]">
-            <div className="grid grid-cols-1 gap-6 2xl:grid-cols-2">
-              <ContractCard snapshot={currentSnapshot.contract} />
-              <FinanceCard snapshot={currentSnapshot.finance} />
-            </div>
-            <HoursCard snapshot={currentSnapshot.hours} />
-          </div>
-          <Footer copyright={currentSnapshot.footer} />
-        </div>
-      );
-    }
-
-    return (
+  return (
+    <WorkspaceFrame>
       <div className="dashboard-shell">
-        <DashboardTopBar snapshot={currentSnapshot.topBar} onPresetChange={setPreset} />
-        <div className="mt-[38px] flex flex-col gap-6 xl:gap-[var(--content-gap)]">
-          <div className="grid grid-cols-1 gap-6 2xl:grid-cols-2">
-            <ProfileCard snapshot={currentSnapshot.profile} />
-            <DataCard snapshot={currentSnapshot.partnerData} />
-          </div>
-          <LogCard snapshot={currentSnapshot.log} />
+        <DashboardTopBar
+          snapshot={snapshot.topBar}
+          backHref="/"
+          backLabel="Voltar para a lista"
+          navigation={navigation}
+        />
+
+        <div className="mt-5">
+          {section === "dashboard" ? renderOverview(snapshot) : renderSection(snapshot, section)}
         </div>
-        <Footer copyright={currentSnapshot.footer} />
+
+        <Footer copyright={snapshot.footer} />
+      </div>
+    </WorkspaceFrame>
+  );
+}
+
+function renderOverview(snapshot: PartnerDashboardSnapshot) {
+  return <DashboardView snapshot={snapshot} />;
+}
+
+function renderSection(snapshot: PartnerDashboardSnapshot, section: Exclude<CreatorSection, "dashboard">) {
+  if (section === "conteudos") {
+    return (
+      <div className="flex flex-col gap-6 xl:gap-[var(--content-gap)]">
+        <div className="grid grid-cols-1 gap-6 2xl:grid-cols-2">
+          <ContentMetricsCard snapshot={snapshot.contentMetrics} />
+          <SocialsCard snapshot={snapshot.socials} />
+        </div>
+        <HoursCard snapshot={snapshot.hours} />
       </div>
     );
   }
+
+  if (section === "financeiro") {
+    return (
+      <div className="flex flex-col gap-6 xl:gap-[var(--content-gap)]">
+        <div className="grid grid-cols-1 gap-6 2xl:grid-cols-2">
+          <ContractCard snapshot={snapshot.contract} />
+          <FinanceCard snapshot={snapshot.finance} />
+        </div>
+        <HoursCard snapshot={snapshot.hours} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-6 xl:gap-[var(--content-gap)]">
+      <div className="grid grid-cols-1 gap-6 2xl:grid-cols-[minmax(0,420px)_minmax(0,1fr)]">
+        <ProfileCard snapshot={snapshot.profile} />
+        <DataCard snapshot={snapshot.partnerData} />
+      </div>
+      <LogCard snapshot={snapshot.log} />
+    </div>
+  );
 }

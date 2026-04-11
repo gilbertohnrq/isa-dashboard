@@ -17,7 +17,7 @@ export async function GET(
       return NextResponse.json({ error: "Criador não encontrado" }, { status: 404 });
     }
 
-    const snapshot = buildSnapshotFromCriador(criador);
+    const snapshot = buildSnapshotFromCriador(criador, { section: "dashboard" });
     return NextResponse.json(snapshot);
   } catch {
     return NextResponse.json({ error: "Erro ao buscar dados" }, { status: 500 });

@@ -1,8 +1,16 @@
 import type { ReactNode } from "react";
 
-export function WorkspaceFrame({ children }: { children: ReactNode }) {
+import { cn } from "@/lib/utils";
+
+export function WorkspaceFrame({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   return (
-    <div className="app-frame">
+    <div className={cn("app-frame", className)}>
       <main className="workspace-main">{children}</main>
     </div>
   );

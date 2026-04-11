@@ -11,13 +11,14 @@ export async function generateStaticParams() {
   return getCreatorStaticParams();
 }
 
-export default async function CriadorPage({ params }: Props) {
+export default async function CriadorDadosPage({ params }: Props) {
   const { id } = await params;
-  const snapshot = await getCreatorSnapshot(id, "dashboard");
+  const snapshot = await getCreatorSnapshot(id, "dados");
 
   if (!snapshot) {
     notFound();
   }
 
-  return <PartnerWorkspacePage section="dashboard" criadorId={id} snapshot={snapshot} />;
+  return <PartnerWorkspacePage section="dados" criadorId={id} snapshot={snapshot} />;
 }
+

@@ -1,5 +1,5 @@
-import { PartnerWorkspacePage } from "@/features/dashboard/partner-workspace-page";
+import { redirect } from "next/navigation";
 
 export default function ContentPage() {
-  return <PartnerWorkspacePage section="conteudos" />;
+  redirect("/");
 }

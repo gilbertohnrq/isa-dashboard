@@ -1,30 +1,24 @@
 import { expect, test } from "@playwright/test";
 
-test.describe("dashboard screenshots", () => {
-  test("desktop", async ({ page }) => {
-    await page.setViewportSize({ width: 1920, height: 1151 });
+const creatorId = "459177910";
+
+test.describe("creator directory smoke", () => {
+  test("home renders the creator directory", async ({ page }) => {
     await page.goto("/");
-    await page.getByText("Perfil do Parceiro").waitFor();
-    await expect(page).toHaveScreenshot("dashboard-desktop.png", {
-      fullPage: true,
-    });
+    await page.getByText("Todos os criadores da base").waitFor();
+    await expect(page.getByRole("link").first()).toBeVisible();
   });
 
-  test("tablet", async ({ page }) => {
-    await page.setViewportSize({ width: 1280, height: 1600 });
-    await page.goto("/");
-    await page.getByText("Perfil do Parceiro").waitFor();
-    await expect(page).toHaveScreenshot("dashboard-tablet.png", {
-      fullPage: true,
-    });
+  test("creator dashboard renders the creator sections", async ({ page }) => {
+    await page.goto(`/criadores/${creatorId}`);
+    await page.getByText("Perfil do Criador").waitFor();
+    await expect(page.getByRole("link", { name: "Conteúdos" })).toBeVisible();
+    await expect(page.getByText("Redes sociais")).toBeVisible();
   });
 
-  test("mobile", async ({ page }) => {
-    await page.setViewportSize({ width: 430, height: 1800 });
-    await page.goto("/");
-    await page.getByText("Perfil do Parceiro").waitFor();
-    await expect(page).toHaveScreenshot("dashboard-mobile.png", {
-      fullPage: true,
-    });
+  test("legacy section routes redirect back to the directory", async ({ page }) => {
+    await page.goto("/financeiro");
+    await page.getByText("Todos os criadores da base").waitFor();
+    await expect(page).toHaveURL(/\/$/);
   });
 });

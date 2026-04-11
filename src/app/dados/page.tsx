@@ -1,5 +1,5 @@
-import { PartnerWorkspacePage } from "@/features/dashboard/partner-workspace-page";
+import { redirect } from "next/navigation";
 
 export default function DataPage() {
-  return <PartnerWorkspacePage section="dados" />;
+  redirect("/");
 }

@@ -1,80 +1,76 @@
-import { startTransition } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
-import { GlassSwitch } from "@/design-system/glass-switch";
-import { IconOrb } from "@/design-system/icon-orb";
-import { SegmentedStepper } from "@/design-system/segmented-stepper";
 import { StatusPill } from "@/design-system/status-pill";
-import type { DashboardPreset, PartnerDashboardSnapshot } from "@/features/dashboard/types";
+import { cn } from "@/lib/utils";
+import type { DashboardTopBar as DashboardTopBarSnapshot } from "@/features/dashboard/types";
+
+type NavigationItem = {
+  href: string;
+  label: string;
+  isActive: boolean;
+};
 
 export function DashboardTopBar({
   snapshot,
-  onPresetChange,
+  backHref,
+  backLabel,
+  navigation,
 }: {
-  snapshot: PartnerDashboardSnapshot["topBar"];
-  onPresetChange: (preset: DashboardPreset) => void;
+  snapshot: DashboardTopBarSnapshot;
+  backHref: string;
+  backLabel: string;
+  navigation: NavigationItem[];
 }) {
   return (
-    <header className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-      <div className="flex items-center gap-3">
-        <StatusPill
-          title={snapshot.status.title}
-          label={snapshot.status.label}
-          tone={snapshot.status.tone}
-        />
-        <div className="relative flex size-[52px] items-center justify-center overflow-hidden rounded-full border border-white/16 bg-[linear-gradient(180deg,rgba(255,255,255,0.18),rgba(255,255,255,0.08)),rgba(235,240,255,0.06)] shadow-[var(--shadow-soft)] backdrop-blur-xl">
-          <Image
-            alt="The Classic Alvorecer"
-            src={snapshot.gameLogoSrc}
-            width={60}
-            height={52}
-            className="relative z-10 h-[38px] w-[42px] object-contain"
-            unoptimized
+    <header className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+        <div className="flex items-start gap-3">
+          <StatusPill
+            title={snapshot.status.title}
+            label={snapshot.status.label}
+            tone={snapshot.status.tone}
           />
-        </div>
-        <div className="glass-button-shell flex h-[52px] items-center gap-2 rounded-full border border-white/14 px-[10px]">
-          {snapshot.actions.map((action) => (
-            <IconOrb
-              key={action.id}
-              src={action.src}
-              alt={action.label}
-              tone={action.tone}
-              precomposed={action.precomposed}
+          <div className="creator-topbar__logo">
+            <Image
+              alt="The Classic Alvorecer"
+              src={snapshot.gameLogoSrc}
+              width={60}
+              height={52}
+              className="relative z-10 h-[38px] w-[42px] object-contain"
+              unoptimized
             />
-          ))}
-        </div>
-      </div>
-      <div className="flex justify-center xl:flex-1 xl:px-2">
-        <SegmentedStepper
-          value={snapshot.activePreset}
-          onChange={(preset) => {
-            startTransition(() => onPresetChange(preset));
-          }}
-        />
-      </div>
-      <div className="flex items-center justify-end gap-2">
-        <div className="glass-button-shell flex h-[36px] items-center rounded-full px-[14px] text-[11px] font-[510] tracking-[-0.08px] text-white">
-          <span>{snapshot.dateLabel}</span>
-        </div>
-        {snapshot.timeLabel ? (
-          <div className="glass-button-shell flex h-[36px] items-center rounded-full px-[12px] text-[11px] font-[510] tracking-[-0.08px] text-white">
-            <span>{snapshot.timeLabel}</span>
           </div>
-        ) : null}
-        <div className="pr-[2px]">
-          <GlassSwitch checked={snapshot.liveEnabled} />
+          <div className="min-w-0">
+            <p className="text-[23px] font-semibold tracking-[-0.05em] text-white">
+              {snapshot.heading}
+            </p>
+            <p className="mt-1 text-[14px] text-white/56">{snapshot.subtitle}</p>
+          </div>
         </div>
-        <div className="relative flex size-[52px] items-center justify-center overflow-hidden rounded-full border border-white/16 bg-[linear-gradient(180deg,rgba(255,255,255,0.18),rgba(255,255,255,0.08)),rgba(235,240,255,0.06)] shadow-[var(--shadow-soft)] backdrop-blur-xl">
-          <Image
-            alt="Discord logo"
-            src={snapshot.discordLogoSrc}
-            width={60}
-            height={60}
-            className="relative z-10 h-[38px] w-[38px] object-contain"
-            unoptimized
-          />
+
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <div className="glass-button-shell flex h-[36px] items-center rounded-full px-[14px] text-[11px] font-[510] tracking-[0.12em] text-white/68 uppercase">
+            <span>{snapshot.dateLabel}</span>
+          </div>
+          <Link href={backHref} className="creator-back-link">
+            {backLabel}
+          </Link>
         </div>
       </div>
+
+      <nav className="creator-section-nav" aria-label="Seções do criador">
+        {navigation.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={cn("creator-section-nav__link", item.isActive && "creator-section-nav__link--active")}
+          >
+            {item.label}
+          </Link>
+        ))}
+      </nav>
     </header>
   );
 }
+

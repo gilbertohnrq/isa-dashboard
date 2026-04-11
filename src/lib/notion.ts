@@ -7,7 +7,17 @@ export const notion = new Client({
 // ── internal types ────────────────────────────────────────────────────────────
 
 type NotionProp = Record<string, unknown>;
-type NotionPage = { id: string; properties: Record<string, NotionProp> };
+type NotionFileRef =
+  | { type: "file"; file?: { url?: string | null } | null }
+  | { type: "external"; external?: { url?: string | null } | null };
+
+type NotionCover = NotionFileRef | null;
+
+type NotionPage = {
+  id: string;
+  cover?: NotionCover;
+  properties: Record<string, NotionProp>;
+};
 type QueryResult = { results: NotionPage[]; has_more: boolean; next_cursor: string | null };
 type DataSources = { query: (args: Record<string, unknown>) => Promise<QueryResult> };
 
@@ -40,6 +50,76 @@ function multiSelect(prop: NotionProp | undefined): string[] {
 function urlProp(prop: NotionProp | undefined): string | null {
   if (!prop) return null;
   return typeof prop.url === "string" ? prop.url : null;
+}
+
+function filesUrl(prop: NotionProp | undefined): string | null {
+  if (!prop) return null;
+
+  const files = prop.files as Array<NotionFileRef> | undefined;
+
+  if (!files?.length) return null;
+
+  return getNotionFileUrl(files[0] ?? null);
+}
+
+function getNotionFileUrl(fileRef: NotionFileRef | null): string | null {
+  if (!fileRef) return null;
+
+  if (fileRef.type === "file") {
+    return fileRef.file?.url ?? null;
+  }
+
+  if (fileRef.type === "external") {
+    return fileRef.external?.url ?? null;
+  }
+
+  return null;
+}
+
+function normalizeHandle(value: string | null): string | null {
+  if (!value) return null;
+
+  const cleaned = value.trim().replace(/^@/, "");
+  return cleaned.length > 0 ? cleaned : null;
+}
+
+function getUsernameFromUrl(url: string | null): string | null {
+  if (!url) return null;
+
+  try {
+    const parsed = new URL(url);
+    const segments = parsed.pathname.split("/").filter(Boolean);
+    return normalizeHandle(segments[0] ?? null);
+  } catch {
+    return null;
+  }
+}
+
+function getUnavatarUrl(platform: string, handle: string | null): string | null {
+  const normalized = normalizeHandle(handle);
+
+  if (!normalized) return null;
+
+  return `https://unavatar.io/${platform}/${encodeURIComponent(normalized)}`;
+}
+
+function getAvatarFallback(input: {
+  twitch: string | null;
+  instagram: string | null;
+  tiktok: string | null;
+  youtube: string | null;
+  kick: string | null;
+  login: string | null;
+  nickname: string;
+}): string | null {
+  return (
+    getUnavatarUrl("twitch", getUsernameFromUrl(input.twitch) ?? input.login ?? input.nickname) ??
+    getUnavatarUrl("instagram", getUsernameFromUrl(input.instagram)) ??
+    getUnavatarUrl("tiktok", getUsernameFromUrl(input.tiktok)) ??
+    getUnavatarUrl("youtube", getUsernameFromUrl(input.youtube)) ??
+    getUnavatarUrl("twitch", getUsernameFromUrl(input.kick)) ??
+    null
+  );
 }
 
 function dateProp(prop: NotionProp | undefined): string | null {
@@ -78,7 +158,9 @@ export type Criador = {
   nome: string;
   nickname: string;
   nomeCompleto: string;
+  login: string | null;
   situacao: string | null;
+  tier: number | null;
   plataformas: string[];
   projeto: string[];
   conteudo: string;
@@ -92,7 +174,10 @@ export type Criador = {
   youtube: string | null;
   tiktok: string | null;
   kick: string | null;
+  instagram: string | null;
+  x: string | null;
   discord: string | null;
+  avatarUrl: string | null;
   possuiWebcam: boolean;
   cadastrado: boolean;
 };
@@ -102,12 +187,22 @@ export async function getCriadores(): Promise<Criador[]> {
 
   return pages.map((page) => {
     const p = page.properties;
+    const nickname = text(p["Nickname"]);
+    const login = text(p["Login"]) || null;
+    const twitch = urlProp(p["Twitch"]);
+    const youtube = urlProp(p["Youtube"]);
+    const tiktok = urlProp(p["TikTok"]);
+    const kick = urlProp(p["Kick"]);
+    const instagram = urlProp(p["Instagram"]) ?? urlProp(p["instagram"]);
+
     return {
       id: page.id,
       nome: text(p["Nome"]),
-      nickname: text(p["Nickname"]),
+      nickname,
       nomeCompleto: text(p["Nome completo"]),
+      login,
       situacao: select(p["Situação"]),
+      tier: num(p["Tier"]),
       plataformas: multiSelect(p["Plataformas"]),
       projeto: multiSelect(p["Projeto"]),
       conteudo: text(p["Conteúdo"]),
@@ -117,11 +212,35 @@ export async function getCriadores(): Promise<Criador[]> {
       valorReais: num(p["Valor (R$)"]),
       inicio: dateProp(p["Início"]),
       theClassicId: num(p["TheClassic ID"]),
-      twitch: urlProp(p["Twitch"]),
-      youtube: urlProp(p["Youtube"]),
-      tiktok: urlProp(p["TikTok"]),
-      kick: urlProp(p["Kick"]),
+      twitch,
+      youtube,
+      tiktok,
+      kick,
+      instagram,
+      x:
+        urlProp(p["X"]) ??
+        urlProp(p["x"]) ??
+        urlProp(p["Twitter"]) ??
+        urlProp(p["twitter"]),
       discord: text(p["Discord"]) || null,
+      avatarUrl:
+        getNotionFileUrl(page.cover ?? null) ??
+        filesUrl(p["Avatar"]) ??
+        filesUrl(p["Foto"]) ??
+        filesUrl(p["Foto de Perfil"]) ??
+        filesUrl(p["Imagem"]) ??
+        urlProp(p["Avatar"]) ??
+        urlProp(p["Foto"]) ??
+        getAvatarFallback({
+          twitch,
+          instagram,
+          tiktok,
+          youtube,
+          kick,
+          login,
+          nickname,
+        }) ??
+        null,
       possuiWebcam: checkbox(p["Possui Webcam?"]),
       cadastrado: checkbox(p["Cadastrado?"]),
     };
