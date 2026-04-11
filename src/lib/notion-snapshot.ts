@@ -10,6 +10,7 @@ const assets = {
   twitch: "/figma-assets/twitch.svg",
   youtube: "/figma-assets/youtube.svg",
   tiktok: "/figma-assets/tiktok.svg",
+  kick: "/figma-assets/kick.svg",
   instagram: "/figma-assets/instagram.svg",
   x: "/figma-assets/x.svg",
 };
@@ -45,7 +46,7 @@ const SOCIAL_SPECS: SocialSpec[] = [
   {
     label: "Kick",
     platform: "kick",
-    monogram: "KI",
+    src: assets.kick,
     getHref: (criador) => criador.kick,
   },
   {
