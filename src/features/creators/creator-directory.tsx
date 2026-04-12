@@ -1,6 +1,5 @@
 "use client";
 
-import type { ReactElement } from "react";
 import { startTransition, useEffect, useDeferredValue, useState } from "react";
 import { Link } from "next-view-transitions";
 import {
@@ -30,47 +29,6 @@ const PROJECT_ICONS: Record<string, string> = {
 
 type GoalKey = "liveHours" | "longVideos" | "shortVideos";
 
-function CameraGlyph({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className={className}>
-      <rect x="4.5" y="7.5" width="10" height="9" rx="2" strokeWidth="2" />
-      <path
-        d="M14.5 10.2 19 7.8v8.4l-4.5-2.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2"
-      />
-    </svg>
-  );
-}
-
-function BagGlyph({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className={className}>
-      <path
-        d="M7.2 9.2h9.6l-.9 8.6H8.1l-.9-8.6Z"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2"
-      />
-      <path
-        d="M9.3 9.2V8a2.7 2.7 0 0 1 5.4 0v1.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2"
-      />
-    </svg>
-  );
-}
-
-function PillGlyph({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-      <rect x="9" y="4.5" width="6" height="15" rx="1.8" />
-    </svg>
-  );
-}
-
 function EyeGlyph({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -92,7 +50,7 @@ const goalConfig: Record<
   GoalKey,
   {
     label: string;
-    icon: ({ className }: { className?: string }) => ReactElement;
+    iconSrc: string;
     colorClassName: string;
     currentColorClassName: string;
     suffix?: string;
@@ -100,20 +58,20 @@ const goalConfig: Record<
 > = {
   liveHours: {
     label: "Live",
-    icon: CameraGlyph,
+    iconSrc: "/figma-assets/icon-live.svg",
     colorClassName: "creator-card-progress__icon--ruby",
     currentColorClassName: "creator-card-progress__current--ruby",
     suffix: "h",
   },
   longVideos: {
     label: "Longos",
-    icon: BagGlyph,
+    iconSrc: "/figma-assets/icon-longvideo.svg",
     colorClassName: "creator-card-progress__icon--lime",
     currentColorClassName: "creator-card-progress__current--lime",
   },
   shortVideos: {
     label: "Curtos",
-    icon: PillGlyph,
+    iconSrc: "/figma-assets/icon-shortvideo.svg",
     colorClassName: "creator-card-progress__icon--rose",
     currentColorClassName: "creator-card-progress__current--rose",
   },
@@ -308,8 +266,6 @@ function CreatorCard({ item }: { item: CreatorDirectoryItem }) {
                     : item.goals?.shortVideos?.delivered;
               const target = goal?.target;
               const progress = getProgress(realized, target);
-              const Icon = config.icon;
-
               const currentLabel = formatCompactMetric(realized ?? 0);
               const targetLabel = formatCompactMetric(target ?? 0);
               const suffix = config.suffix ?? "";
@@ -317,7 +273,8 @@ function CreatorCard({ item }: { item: CreatorDirectoryItem }) {
               return (
                 <div key={goalKey} className="creator-card-progress">
                   <span className={cn("creator-card-progress__icon", config.colorClassName)}>
-                    <Icon className="size-3" />
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={config.iconSrc} alt="" className="size-3 object-contain" />
                   </span>
                   <div className="creator-card-progress__track">
                     <span className="creator-card-progress__bar" style={{ width: `${progress}%` }} />
@@ -386,7 +343,11 @@ function HeartIcon({ active }: { active: boolean }) {
       aria-hidden="true"
       className={cn("creator-card-hearts__icon", active && "creator-card-hearts__icon--active")}
       viewBox="0 0 24 24"
-      fill="currentColor"
+      fill={active ? "currentColor" : "none"}
+      stroke={active ? "none" : "currentColor"}
+      strokeWidth={active ? undefined : "2"}
+      strokeLinecap={active ? undefined : "round"}
+      strokeLinejoin={active ? undefined : "round"}
     >
       <path d="M12 21.35 10.55 20C5.4 15.24 2 12.09 2 8.24 2 5.09 4.42 2.7 7.5 2.7c1.74 0 3.41.81 4.5 2.08 1.09-1.27 2.76-2.08 4.5-2.08 3.08 0 5.5 2.39 5.5 5.54 0 3.85-3.4 7-8.55 11.77L12 21.35Z" />
     </svg>
