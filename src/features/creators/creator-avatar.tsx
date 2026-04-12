@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
 
 import { cn } from "@/lib/utils";
@@ -9,6 +12,7 @@ export function CreatorAvatar({
   className,
   imageClassName,
   fallbackClassName,
+  avatarId,
   viewTransitionName,
 }: {
   name: string;
@@ -17,15 +21,23 @@ export function CreatorAvatar({
   className?: string;
   imageClassName?: string;
   fallbackClassName?: string;
+  avatarId?: string;
   viewTransitionName?: string;
 }) {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   return (
     <div
+      data-creator-avatar-id={avatarId}
       className={cn(
         "relative overflow-hidden rounded-full border border-white/10 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.16),rgba(255,255,255,0.02)_52%),linear-gradient(180deg,rgba(79,125,73,0.35),rgba(16,20,24,0.94))]",
         className,
       )}
-      style={viewTransitionName ? { viewTransitionName } : undefined}
+      style={isMounted && viewTransitionName ? { viewTransitionName } : undefined}
     >
       {src ? (
         src.startsWith("/") ? (

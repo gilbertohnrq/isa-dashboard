@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 
 import { CreatorAvatar } from "@/features/creators/creator-avatar";
+import { CREATOR_TRANSITION_STORAGE_KEY } from "@/features/creators/creator-transition-sync";
 import { FilterSelect } from "@/features/creators/filter-select";
 import type { CreatorDirectoryItem } from "@/features/creators/types";
 import { Input } from "@/components/ui/input";
@@ -159,7 +160,13 @@ function getStatusToneClass(status: string) {
   return "creator-card-status--negative";
 }
 
-function CreatorCard({ item }: { item: CreatorDirectoryItem }) {
+function CreatorCard({
+  item,
+  onPrepareTransition,
+}: {
+  item: CreatorDirectoryItem;
+  onPrepareTransition: (creatorId: string) => void;
+}) {
   const heartToneClassName = getHeartTone(item.stars);
   const effectiveStatus = getEffectiveStatus(item);
   const tierLabel = (item.tierNum ?? item.tierLabel.replace(/\D+/g, "")) || "-";
@@ -170,7 +177,11 @@ function CreatorCard({ item }: { item: CreatorDirectoryItem }) {
   };
 
   return (
-    <Link href={`/criadores/${item.id}`} className="creator-card-link group">
+    <Link
+      href={`/criadores/${item.id}`}
+      className="creator-card-link group"
+      onClick={() => onPrepareTransition(item.id)}
+    >
       <article className="creator-card-v2">
         <div className="creator-card-v2__glow" />
         <div className="creator-card-v2__topbar">
@@ -208,12 +219,12 @@ function CreatorCard({ item }: { item: CreatorDirectoryItem }) {
         <div className="creator-card-v2__body">
           <div className="creator-card-v2__identity">
             <CreatorAvatar
+              avatarId={item.id}
               name={item.name}
               initials={item.initials}
               src={item.avatarUrl}
               className="creator-card-v2__avatar"
               fallbackClassName="text-[13px] font-semibold tracking-[0.08em]"
-              viewTransitionName={`avatar-${item.id}`}
             />
 
             <div className="creator-card-v2__identity-copy">
@@ -333,6 +344,7 @@ export function CreatorDirectory({ items }: { items: CreatorDirectoryItem[] }) {
   const [tier, setTier] = useState("all");
   const [project, setProject] = useState("all");
   const [collapsedProjects, setCollapsedProjects] = useState<Record<string, boolean>>({});
+  const [activeTransitionId, setActiveTransitionId] = useState<string | null>(null);
   const [snapshotNow, setSnapshotNow] = useState(() => new Date());
 
   const toggleProject = (projectName: string) => {
@@ -346,7 +358,39 @@ export function CreatorDirectory({ items }: { items: CreatorDirectoryItem[] }) {
     const interval = setInterval(() => setSnapshotNow(new Date()), 1000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    setActiveTransitionId(window.sessionStorage.getItem(CREATOR_TRANSITION_STORAGE_KEY));
+  }, []);
+
+  useEffect(() => {
+    const avatars = Array.from(
+      document.querySelectorAll<HTMLElement>("[data-creator-avatar-id]"),
+    );
+
+    avatars.forEach((avatar) => {
+      avatar.style.removeProperty("view-transition-name");
+    });
+
+    if (!activeTransitionId) {
+      return;
+    }
+
+    const transitionTarget = avatars.find(
+      (avatar) => avatar.dataset.creatorAvatarId === activeTransitionId,
+    );
+
+    if (transitionTarget) {
+      transitionTarget.style.viewTransitionName = `avatar-${activeTransitionId}`;
+    }
+  });
+
   const deferredSearch = useDeferredValue(search);
+
+  const prepareAvatarTransition = (creatorId: string) => {
+    window.sessionStorage.setItem(CREATOR_TRANSITION_STORAGE_KEY, creatorId);
+    setActiveTransitionId(creatorId);
+  };
 
   const statuses = uniqueValues(items.map((item) => getEffectiveStatus(item)));
   const tiers = uniqueValues(items.map((item) => item.tierLabel));
@@ -481,8 +525,11 @@ export function CreatorDirectory({ items }: { items: CreatorDirectoryItem[] }) {
                 {!isCollapsed && (
                   <div className="creator-grid" role="list" aria-label={`Creators de ${projectGroup}`}>
                     {groupItems.map((item) => (
-                      <div key={item.id} role="listitem">
-                        <CreatorCard item={item} />
+                      <div key={`${projectGroup}-${item.id}`} role="listitem">
+                        <CreatorCard
+                          item={item}
+                          onPrepareTransition={prepareAvatarTransition}
+                        />
                       </div>
                     ))}
                   </div>

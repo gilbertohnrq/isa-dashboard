@@ -11,6 +11,7 @@ import {
 } from "@/features/dashboard/dashboard-cards";
 import { DashboardTopBar } from "@/features/dashboard/dashboard-topbar";
 import { DashboardView } from "@/features/dashboard/dashboard-view";
+import { CreatorTransitionSync } from "@/features/creators/creator-transition-sync";
 import type { PartnerDashboardSnapshot } from "@/features/dashboard/types";
 import { getCreatorSectionLinks } from "@/features/creators/server";
 import type { CreatorSection } from "@/features/creators/types";
@@ -31,6 +32,7 @@ export function PartnerWorkspacePage({
   return (
     <WorkspaceFrame>
       <div className="dashboard-shell">
+        <CreatorTransitionSync creatorId={criadorId} />
         <DashboardTopBar
           snapshot={snapshot.topBar}
           backHref="/"
