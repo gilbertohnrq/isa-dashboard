@@ -2,13 +2,6 @@
 
 import Image from "next/image";
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from "@/components/ui/select";
-
 type FilterOption = {
   value: string;
   label: string;
@@ -113,6 +106,19 @@ export function FilterSelect({ label, value, options, onChange, gameIcons }: Fil
 
   return (
     <div className={`filter-chip ${isStatus ? "filter-chip--status" : ""} ${isTier ? "filter-chip--tier" : ""} ${isProjeto ? "filter-chip--project" : ""}`}>
+      <select
+        aria-label={label}
+        className="filter-chip-native-select"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+      >
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+
       <div className={`filter-chip-icon ${iconColorClass}`}>
         {isStatus && <StatusIcon value={selectedLabel} />}
         {isTier && <TierIcon />}
@@ -120,40 +126,12 @@ export function FilterSelect({ label, value, options, onChange, gameIcons }: Fil
       </div>
       <div className="filter-chip-body">
         <span className="filter-chip-label">{label}</span>
-        <Select value={value} onValueChange={onChange}>
-          <SelectTrigger aria-label={label} className="filter-chip-trigger">
-            <span className="filter-chip-trigger__value">{selectedLabel}</span>
-          </SelectTrigger>
-          <SelectContent className="filter-chip-content">
-            {options.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                <span className="filter-chip-option">
-                  {isProjeto && (
-                    gameIcons?.[option.value] ? (
-                      <Image
-                        src={gameIcons[option.value]}
-                        alt={option.label}
-                        width={18}
-                        height={18}
-                        className="filter-chip-option-icon"
-                      />
-                    ) : (
-                      <Image
-                        src="/figma-assets/logo-game.png"
-                        alt="TCG"
-                        width={18}
-                        height={18}
-                        className="filter-chip-option-icon"
-                        style={{ objectFit: "contain", padding: "2px" }}
-                      />
-                    )
-                  )}
-                  {option.label}
-                </span>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <span className="filter-chip-trigger">
+          <span className="filter-chip-trigger__value">{selectedLabel}</span>
+          <svg className="filter-chip-trigger__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="m7 10 5 5 5-5" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+          </svg>
+        </span>
       </div>
     </div>
   );
