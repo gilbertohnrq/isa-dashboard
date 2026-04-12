@@ -5,12 +5,9 @@ import { Link } from "next-view-transitions";
 import {
   CalendarDays,
   Clock3,
-  Clapperboard,
   Menu,
   Search,
-  Sparkles,
   Star,
-  Video,
 } from "lucide-react";
 
 import { CreatorAvatar } from "@/features/creators/creator-avatar";
@@ -33,29 +30,70 @@ const PROJECT_ICONS: Record<string, string> = {
 
 type GoalKey = "liveHours" | "longVideos" | "shortVideos";
 
+function CameraGlyph({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className={className}>
+      <rect x="4.5" y="7.5" width="10" height="9" rx="2" strokeWidth="2" />
+      <path
+        d="M14.5 10.2 19 7.8v8.4l-4.5-2.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+      />
+    </svg>
+  );
+}
+
+function BagGlyph({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className={className}>
+      <path
+        d="M7.2 9.2h9.6l-.9 8.6H8.1l-.9-8.6Z"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+      />
+      <path
+        d="M9.3 9.2V8a2.7 2.7 0 0 1 5.4 0v1.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+      />
+    </svg>
+  );
+}
+
+function PillGlyph({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <rect x="9" y="4.5" width="6" height="15" rx="1.8" />
+    </svg>
+  );
+}
+
 const goalConfig: Record<
   GoalKey,
   {
     label: string;
-    icon: typeof Video;
+    icon: ({ className }: { className?: string }) => JSX.Element;
     colorClassName: string;
     suffix?: string;
   }
 > = {
   liveHours: {
     label: "Live",
-    icon: Video,
+    icon: CameraGlyph,
     colorClassName: "creator-card-progress__icon--ruby",
     suffix: "h",
   },
   longVideos: {
     label: "Longos",
-    icon: Clapperboard,
+    icon: BagGlyph,
     colorClassName: "creator-card-progress__icon--lime",
   },
   shortVideos: {
     label: "Curtos",
-    icon: Sparkles,
+    icon: PillGlyph,
     colorClassName: "creator-card-progress__icon--rose",
   },
 };
@@ -216,50 +254,52 @@ function CreatorCard({ item }: { item: CreatorDirectoryItem }) {
           </span>
         </div>
 
-        <div className="creator-card-v2__identity">
-          <CreatorAvatar
-            name={item.name}
-            initials={item.initials}
-            src={item.avatarUrl}
-            className="creator-card-v2__avatar"
-            fallbackClassName="text-[15px] font-semibold tracking-[0.08em]"
-            viewTransitionName={`avatar-${item.id}`}
-          />
+        <div className="creator-card-v2__body">
+          <div className="creator-card-v2__identity">
+            <CreatorAvatar
+              name={item.name}
+              initials={item.initials}
+              src={item.avatarUrl}
+              className="creator-card-v2__avatar"
+              fallbackClassName="text-[13px] font-semibold tracking-[0.08em]"
+              viewTransitionName={`avatar-${item.id}`}
+            />
 
-          <div className="creator-card-v2__identity-copy">
-            <span className="creator-card-v2__name">{item.name}</span>
-            <span className="creator-card-v2__id">{item.id}</span>
+            <div className="creator-card-v2__identity-copy">
+              <span className="creator-card-v2__name">{item.name}</span>
+              <span className="creator-card-v2__id">{item.id}</span>
+            </div>
           </div>
-        </div>
 
-        <div className="creator-card-v2__progress-list">
-          {(Object.keys(goalConfig) as GoalKey[]).map((goalKey) => {
-            const config = goalConfig[goalKey];
-            const goal =
-              goalKey === "liveHours"
-                ? item.goals?.liveHours
-                : goalKey === "longVideos"
-                  ? item.goals?.longVideos
-                  : item.goals?.shortVideos;
-            const realized = goalKey === "liveHours" ? goal?.realized : goal?.delivered;
-            const target = goal?.target;
-            const progress = getProgress(realized, target);
-            const Icon = config.icon;
+          <div className="creator-card-v2__progress-list">
+            {(Object.keys(goalConfig) as GoalKey[]).map((goalKey) => {
+              const config = goalConfig[goalKey];
+              const goal =
+                goalKey === "liveHours"
+                  ? item.goals?.liveHours
+                  : goalKey === "longVideos"
+                    ? item.goals?.longVideos
+                    : item.goals?.shortVideos;
+              const realized = goalKey === "liveHours" ? goal?.realized : goal?.delivered;
+              const target = goal?.target;
+              const progress = getProgress(realized, target);
+              const Icon = config.icon;
 
-            return (
-              <div key={goalKey} className="creator-card-progress">
-                <span className={cn("creator-card-progress__icon", config.colorClassName)}>
-                  <Icon className="size-3" />
-                </span>
-                <div className="creator-card-progress__track">
-                  <span className="creator-card-progress__bar" style={{ width: `${progress}%` }} />
+              return (
+                <div key={goalKey} className="creator-card-progress">
+                  <span className={cn("creator-card-progress__icon", config.colorClassName)}>
+                    <Icon className="size-3" />
+                  </span>
+                  <div className="creator-card-progress__track">
+                    <span className="creator-card-progress__bar" style={{ width: `${progress}%` }} />
+                  </div>
+                  <span className="creator-card-progress__value">
+                    {formatRatio(realized, target, config.suffix)}
+                  </span>
                 </div>
-                <span className="creator-card-progress__value">
-                  {formatRatio(realized, target, config.suffix)}
-                </span>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
 
         <div className="creator-card-v2__finance">

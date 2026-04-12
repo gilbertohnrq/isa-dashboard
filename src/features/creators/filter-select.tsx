@@ -7,7 +7,6 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select";
 
 type FilterOption = {
@@ -24,12 +23,11 @@ type FilterSelectProps = {
   gameIcons?: Record<string, string>;
 };
 
-/* ── Status icons change based on selected value ── */
 function StatusIcon({ value }: { value: string }) {
   if (value === "Ativo") {
     return (
-      <svg className="filter-chip-icon-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
+      <svg className="filter-chip-icon-svg" viewBox="0 0 24 24" fill="currentColor">
+        <circle cx="12" cy="12" r="7" />
       </svg>
     );
   }
@@ -55,16 +53,23 @@ function StatusIcon({ value }: { value: string }) {
   );
 }
 
-/* ── Tier icon - Stitch sliders ── */
 function TierIcon() {
   return (
     <svg className="filter-chip-icon-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
+      <path d="m12 3.8 2.2 4.45 4.92.71-3.56 3.47.84 4.9L12 15l-4.4 2.33.84-4.9-3.56-3.47 4.92-.71L12 3.8Z" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} />
     </svg>
   );
 }
 
-/* ── Projeto icon - TCG logo default, game icon when filtered ── */
+function ProjectIconGlyph() {
+  return (
+    <svg className="filter-chip-icon-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path d="M7 10h10a4 4 0 0 1 0 8h-1.5l-1.8-2H10.3l-1.8 2H7a4 4 0 0 1 0-8Z" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} />
+      <path d="M8.75 13.5h2.5M10 12.25v2.5M15.9 13.2h.01M18 15.2h.01" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} />
+    </svg>
+  );
+}
+
 function ProjetoIcon({ value, gameIcons }: { value: string; gameIcons?: Record<string, string> }) {
   const gameIcon = gameIcons?.[value];
   if (gameIcon) {
@@ -78,17 +83,7 @@ function ProjetoIcon({ value, gameIcons }: { value: string; gameIcons?: Record<s
       />
     );
   }
-  // Default: show TCG logo
-  return (
-    <Image
-      src="/figma-assets/logo-game.png"
-      alt="The Classic Games"
-      width={24}
-      height={24}
-      className="filter-chip-game-img"
-      style={{ padding: "3px", objectFit: "contain" }}
-    />
-  );
+  return <ProjectIconGlyph />;
 }
 
 function getStatusColorClass(value: string) {
@@ -117,7 +112,7 @@ export function FilterSelect({ label, value, options, onChange, gameIcons }: Fil
   }
 
   return (
-    <div className="filter-chip">
+    <div className={`filter-chip ${isStatus ? "filter-chip--status" : ""} ${isTier ? "filter-chip--tier" : ""} ${isProjeto ? "filter-chip--project" : ""}`}>
       <div className={`filter-chip-icon ${iconColorClass}`}>
         {isStatus && <StatusIcon value={selectedLabel} />}
         {isTier && <TierIcon />}
@@ -127,7 +122,7 @@ export function FilterSelect({ label, value, options, onChange, gameIcons }: Fil
         <span className="filter-chip-label">{label}</span>
         <Select value={value} onValueChange={onChange}>
           <SelectTrigger aria-label={label} className="filter-chip-trigger">
-            <SelectValue placeholder={label} />
+            <span className="filter-chip-trigger__value">{selectedLabel}</span>
           </SelectTrigger>
           <SelectContent className="filter-chip-content">
             {options.map((option) => (
