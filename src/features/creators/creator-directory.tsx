@@ -1,14 +1,13 @@
 "use client";
 
 import type { ReactElement } from "react";
-import { startTransition, useDeferredValue, useState } from "react";
+import { startTransition, useEffect, useDeferredValue, useState } from "react";
 import { Link } from "next-view-transitions";
 import {
   CalendarDays,
   Clock3,
   Menu,
   Search,
-  Star,
 } from "lucide-react";
 
 import { CreatorAvatar } from "@/features/creators/creator-avatar";
@@ -250,7 +249,6 @@ function CreatorCard({ item }: { item: CreatorDirectoryItem }) {
         <div className="creator-card-v2__glow" />
         <div className="creator-card-v2__topbar">
           <span className="creator-chip creator-chip--tier">
-            <Star className="size-3" />
             Tier {tierLabel}
           </span>
 
@@ -343,7 +341,7 @@ function CreatorCard({ item }: { item: CreatorDirectoryItem }) {
                 <span className="creator-finance-item__target creator-finance-item__target--green"> / {formatCompactMetric(item.receivables?.amountReal?.contract)}</span>
               </span>
             </div>
-            <div className="creator-finance-item__track">
+            <div className="creator-finance-item__track creator-finance-item__track--green">
               <span className="creator-finance-item__bar creator-finance-item__bar--green" style={{ width: `${financialProgress.real}%` }} />
             </div>
           </div>
@@ -356,7 +354,7 @@ function CreatorCard({ item }: { item: CreatorDirectoryItem }) {
                 <span className="creator-finance-item__target creator-finance-item__target--amber"> / {formatCompactMetric(item.receivables?.amountTCC?.contract)}</span>
               </span>
             </div>
-            <div className="creator-finance-item__track">
+            <div className="creator-finance-item__track creator-finance-item__track--amber">
               <span className="creator-finance-item__bar creator-finance-item__bar--amber" style={{ width: `${financialProgress.tcc}%` }} />
             </div>
           </div>
@@ -400,7 +398,12 @@ export function CreatorDirectory({ items }: { items: CreatorDirectoryItem[] }) {
   const [status, setStatus] = useState("Ativo");
   const [tier, setTier] = useState("all");
   const [project, setProject] = useState("all");
-  const [snapshotNow] = useState(() => new Date());
+  const [snapshotNow, setSnapshotNow] = useState(() => new Date());
+
+  useEffect(() => {
+    const interval = setInterval(() => setSnapshotNow(new Date()), 1000);
+    return () => clearInterval(interval);
+  }, []);
   const deferredSearch = useDeferredValue(search);
 
   const statuses = uniqueValues(items.map((item) => item.status));

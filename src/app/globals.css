@@ -153,15 +153,17 @@ button:disabled {
   position: fixed;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(5, 9, 17, 0.12), rgba(5, 9, 17, 0.36)),
-    linear-gradient(0deg, rgba(8, 10, 20, 0.18), rgba(8, 10, 20, 0.18)),
-    url("/background-smoke-purple.png"),
+    linear-gradient(180deg, rgba(5, 9, 17, 0.08), rgba(5, 9, 17, 0.28)),
     url("/figma-assets/background.jpg");
   background-position: center top;
   background-repeat: no-repeat;
-  background-size: cover, cover, cover, cover;
+  background-size: cover;
   background-attachment: fixed;
-  filter: saturate(1.12) brightness(0.92) contrast(1.02);
+  filter: saturate(1.08) brightness(0.9) contrast(1.0);
+}
+
+.app-frame--directory::after {
+  display: none;
 }
 
 .app-frame::after {
@@ -393,7 +395,8 @@ button:disabled {
 .creator-directory-page {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 47px;
+  padding-top: 14px;
 }
 
 .creator-toolbar {
@@ -422,38 +425,34 @@ button:disabled {
 
 .creator-toolbar__menu {
   display: grid;
-  height: 48px;
-  width: 48px;
+  height: 70px;
+  width: 70px;
   place-items: center;
   border-radius: 999px;
   color: rgba(255, 255, 255, 0.88);
+  flex-shrink: 0;
 }
 
 .filter-chip {
   display: flex;
   min-width: 0;
   align-items: center;
-  gap: 9px;
-  min-height: 46px;
-  padding: 6px 13px 6px 10px;
+  gap: 8px;
+  height: 70px;
+  padding: 0 14px;
   border-radius: 999px;
   isolation: isolate;
+  flex-shrink: 0;
   transition:
     border-color 180ms ease,
     transform 180ms ease,
     background-color 180ms ease;
 }
 
-.filter-chip--status {
-  width: 110px;
-}
-
-.filter-chip--tier {
-  width: 86px;
-}
-
+.filter-chip--status,
+.filter-chip--tier,
 .filter-chip--project {
-  width: 108px;
+  width: 155px;
 }
 
 .filter-chip:hover {
@@ -463,8 +462,8 @@ button:disabled {
 
 .filter-chip-icon {
   display: flex;
-  height: 24px;
-  width: 24px;
+  height: 40px;
+  width: 40px;
   align-items: center;
   justify-content: center;
   border-radius: 999px;
@@ -502,8 +501,8 @@ button:disabled {
 }
 
 .filter-chip-icon-svg {
-  width: 12px;
-  height: 12px;
+  width: 18px;
+  height: 18px;
 }
 
 .filter-chip-game-img {
@@ -522,9 +521,9 @@ button:disabled {
 }
 
 .filter-chip-label {
-  color: rgba(255, 255, 255, 0.78);
-  font-size: 11px;
-  font-weight: 600;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 15px;
+  font-weight: 510;
   line-height: 1;
 }
 
@@ -544,13 +543,13 @@ button:disabled {
   width: 100%;
   align-items: center;
   justify-content: space-between;
-  gap: 6px;
+  gap: 4px;
   border: none;
   background: transparent;
   padding: 0;
   box-shadow: none !important;
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 11px;
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 14px;
   font-weight: 500;
   line-height: 1;
   outline: none;
@@ -561,19 +560,19 @@ button:disabled {
   text-overflow: ellipsis;
   white-space: nowrap;
   text-align: left;
-  color: rgba(255, 255, 255, 0.52);
+  color: rgba(255, 255, 255, 0.35);
 }
 
 .filter-chip-trigger__chevron {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   flex: none;
   color: rgba(255, 255, 255, 0.28);
 }
 
 .creator-toolbar__search {
   position: relative;
-  width: 208px;
+  width: 249px;
   margin-left: auto;
   flex: none;
 }
@@ -588,7 +587,7 @@ button:disabled {
 }
 
 .creator-toolbar__search-input {
-  height: 46px;
+  height: 44px;
   border-radius: 999px;
   border-color: rgba(255, 255, 255, 0.08);
   background:
@@ -625,13 +624,13 @@ button:disabled {
 
 .creator-toolbar__datetime-chip {
   display: inline-flex;
-  min-height: 46px;
+  height: 34px;
   align-items: center;
   gap: 8px;
   border-radius: 999px;
-  padding: 0 14px;
+  padding: 0 16px;
   color: rgba(255, 255, 255, 0.82);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
   white-space: nowrap;
 }
@@ -642,26 +641,27 @@ button:disabled {
 
 .creator-toolbar__brand {
   display: grid;
-  height: 46px;
-  width: 46px;
+  height: 70px;
+  width: 70px;
   place-items: center;
   border-radius: 999px;
   border-color: rgba(255, 188, 79, 0.35);
   background:
     linear-gradient(180deg, rgba(255, 212, 135, 0.08), rgba(255, 255, 255, 0.03)),
     rgba(19, 21, 29, 0.64);
+  flex-shrink: 0;
 }
 
 .creator-toolbar__brand img {
-  width: 28px;
-  height: 28px;
+  width: 42px;
+  height: 42px;
   object-fit: contain;
 }
 
 .creator-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px 16px;
+  gap: 40px 42px;
   align-items: start;
 }
 
@@ -674,15 +674,15 @@ button:disabled {
   display: flex;
   min-height: 265px;
   flex-direction: column;
-  gap: 10px;
+  gap: 18px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 30px;
   padding: 17px;
   background: rgba(40, 40, 40, 0.62);
   box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
-  backdrop-filter: blur(28px) saturate(120%);
-  -webkit-backdrop-filter: blur(28px) saturate(120%);
+  backdrop-filter: blur(15px) saturate(120%);
+  -webkit-backdrop-filter: blur(15px) saturate(120%);
   transition:
     transform 180ms ease,
     border-color 180ms ease,
@@ -732,19 +732,20 @@ button:disabled {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  min-height: 22px;
+  min-height: 27px;
   border-radius: 999px;
-  padding: 0 9px;
-  font-size: 10px;
-  font-weight: 600;
+  padding: 0 11px;
+  font-size: 13px;
+  font-weight: 500;
   line-height: 1;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.08px;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .creator-chip--tier {
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.75);
+  background: rgba(120, 120, 128, 0.32);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .creator-chip--status {
@@ -770,12 +771,12 @@ button:disabled {
 
 .creator-card-hearts {
   display: inline-flex;
-  gap: 2px;
+  gap: 6px;
 }
 
 .creator-card-hearts__icon {
-  width: 10px;
-  height: 10px;
+  width: 11px;
+  height: 11px;
   color: rgba(255, 255, 255, 0.2);
 }
 
@@ -797,8 +798,8 @@ button:disabled {
 
 .creator-project-badge {
   display: grid;
-  width: 24px;
-  height: 24px;
+  width: 27px;
+  height: 27px;
   place-items: center;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.14);
@@ -819,12 +820,12 @@ button:disabled {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 10px;
+  gap: 6px;
 }
 
 .creator-card-v2__avatar {
-  width: 60px;
-  height: 60px;
+  width: 54px;
+  height: 54px;
   flex: none;
 }
 
@@ -859,7 +860,7 @@ button:disabled {
   display: flex;
   flex-direction: column;
   gap: 13px;
-  padding-top: 2px;
+  padding-top: 8px;
 }
 
 .creator-card-progress {
@@ -887,13 +888,27 @@ button:disabled {
   color: #ff7070;
 }
 
-.creator-card-progress__track,
-.creator-finance-item__track {
+.creator-card-progress__track {
   position: relative;
-  height: 4px;
+  height: 6px;
   overflow: hidden;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.1);
+}
+
+.creator-finance-item__track {
+  position: relative;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+}
+
+.creator-finance-item__track--green {
+  background: rgba(101, 251, 125, 0.09);
+}
+
+.creator-finance-item__track--amber {
+  background: rgba(255, 141, 40, 0.2);
 }
 
 .creator-card-progress__bar,
@@ -951,7 +966,7 @@ button:disabled {
 .creator-finance-item {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 12px;
 }
 
 .creator-finance-item__header {
