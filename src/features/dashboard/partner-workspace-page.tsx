@@ -22,7 +22,7 @@ export function PartnerWorkspacePage({
   snapshot,
 }: {
   section: CreatorSection;
-  criaturaId: string;
+  criadorId: string;
   snapshot: PartnerDashboardSnapshot;
 }) {
   const navigation = getCreatorSectionLinks(criadorId, section);
