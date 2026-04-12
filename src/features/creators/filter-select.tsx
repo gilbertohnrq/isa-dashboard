@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 import {
   Select,
   SelectContent,
@@ -67,20 +69,24 @@ function ProjetoIcon({ value, gameIcons }: { value: string; gameIcons?: Record<s
   const gameIcon = gameIcons?.[value];
   if (gameIcon) {
     return (
-      <img
+      <Image
         src={gameIcon}
         alt={value}
+        width={24}
+        height={24}
         className="filter-chip-game-img"
       />
     );
   }
   // Default: show TCG logo
   return (
-    <img
-      src="https://theclassic.games/assets/img/logo_theclassic.png"
+    <Image
+      src="/figma-assets/logo-game.png"
       alt="The Classic Games"
+      width={24}
+      height={24}
       className="filter-chip-game-img"
-      style={{ filter: "brightness(0) invert(1)", padding: "8px", objectFit: "contain" }}
+      style={{ padding: "3px", objectFit: "contain" }}
     />
   );
 }
@@ -120,7 +126,7 @@ export function FilterSelect({ label, value, options, onChange, gameIcons }: Fil
       <div className="filter-chip-body">
         <span className="filter-chip-label">{label}</span>
         <Select value={value} onValueChange={onChange}>
-          <SelectTrigger className="filter-chip-trigger">
+          <SelectTrigger aria-label={label} className="filter-chip-trigger">
             <SelectValue placeholder={label} />
           </SelectTrigger>
           <SelectContent className="filter-chip-content">
@@ -129,17 +135,21 @@ export function FilterSelect({ label, value, options, onChange, gameIcons }: Fil
                 <span className="filter-chip-option">
                   {isProjeto && (
                     gameIcons?.[option.value] ? (
-                      <img
+                      <Image
                         src={gameIcons[option.value]}
                         alt={option.label}
+                        width={18}
+                        height={18}
                         className="filter-chip-option-icon"
                       />
                     ) : (
-                      <img
-                        src="https://theclassic.games/assets/img/logo_theclassic.png"
+                      <Image
+                        src="/figma-assets/logo-game.png"
                         alt="TCG"
+                        width={18}
+                        height={18}
                         className="filter-chip-option-icon"
-                        style={{ filter: "brightness(0) invert(1)", objectFit: "contain", padding: "2px" }}
+                        style={{ objectFit: "contain", padding: "2px" }}
                       />
                     )
                   )}

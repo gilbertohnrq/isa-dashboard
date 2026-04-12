@@ -2,19 +2,316 @@
 
 import { startTransition, useDeferredValue, useState } from "react";
 import { Link } from "next-view-transitions";
+import {
+  CalendarDays,
+  Clock3,
+  Clapperboard,
+  Menu,
+  Search,
+  Sparkles,
+  Star,
+  Video,
+} from "lucide-react";
 
-import { motion } from "motion/react";
-
-import { GlassPanel } from "@/design-system/glass-panel";
 import { CreatorAvatar } from "@/features/creators/creator-avatar";
 import { FilterSelect } from "@/features/creators/filter-select";
 import type { CreatorDirectoryItem } from "@/features/creators/types";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
+const PROJECT_ICONS: Record<string, string> = {
+  "PW A.S.": "/game-icons/pwas.png",
+  "PW 1.2.6": "/game-icons/pw126.png",
+  "PW 126": "/game-icons/pw126.png",
+  "PW 1.8.7": "/game-icons/pw187.png",
+  "PW 187": "/game-icons/pw187.png",
+  MU: "/game-icons/mus21.png",
+  "L2 Midnight": "/game-icons/l2m.png",
+  L2M: "/game-icons/l2m.png",
+  L2: "/game-icons/l2m.png",
+};
+
+type GoalKey = "liveHours" | "longVideos" | "shortVideos";
+
+const goalConfig: Record<
+  GoalKey,
+  {
+    label: string;
+    icon: typeof Video;
+    colorClassName: string;
+    suffix?: string;
+  }
+> = {
+  liveHours: {
+    label: "Live",
+    icon: Video,
+    colorClassName: "creator-card-progress__icon--ruby",
+    suffix: "h",
+  },
+  longVideos: {
+    label: "Longos",
+    icon: Clapperboard,
+    colorClassName: "creator-card-progress__icon--lime",
+  },
+  shortVideos: {
+    label: "Curtos",
+    icon: Sparkles,
+    colorClassName: "creator-card-progress__icon--rose",
+  },
+};
+
 function uniqueValues(values: string[]) {
   return [...new Set(values.filter(Boolean))].sort((left, right) =>
     left.localeCompare(right, "pt-BR"),
+  );
+}
+
+function getProjectIcon(projects: string[]) {
+  const project = projects[0];
+  return project ? PROJECT_ICONS[project] ?? null : null;
+}
+
+function getProgress(realized: number | null | undefined, target: number | null | undefined) {
+  if (realized == null || target == null || target <= 0) {
+    return 0;
+  }
+
+  return Math.max(0, Math.min(100, (realized / target) * 100));
+}
+
+function getAverageGoalProgress(item: CreatorDirectoryItem) {
+  if (!item.goals) {
+    return 0;
+  }
+
+  const values = [
+    getProgress(item.goals.liveHours?.realized, item.goals.liveHours?.target),
+    getProgress(item.goals.longVideos?.delivered, item.goals.longVideos?.target),
+    getProgress(item.goals.shortVideos?.delivered, item.goals.shortVideos?.target),
+  ].filter((value) => value > 0);
+
+  if (values.length === 0) {
+    return 0;
+  }
+
+  return values.reduce((total, value) => total + value, 0) / values.length;
+}
+
+function getHeartTone(progress: number) {
+  if (progress >= 90) {
+    return "creator-card-hearts--green";
+  }
+
+  if (progress >= 60) {
+    return "creator-card-hearts--amber";
+  }
+
+  return "creator-card-hearts--red";
+}
+
+function formatCompactMetric(value: number | null | undefined) {
+  if (value == null) {
+    return "-";
+  }
+
+  return new Intl.NumberFormat("pt-BR", {
+    maximumFractionDigits: value >= 100 ? 0 : 2,
+  }).format(value);
+}
+
+function formatCurrencyStat(value: number | null | undefined) {
+  if (value == null) {
+    return "-";
+  }
+
+  return `R$ ${new Intl.NumberFormat("pt-BR", {
+    maximumFractionDigits: value >= 1000 ? 0 : 2,
+  }).format(value)}`;
+}
+
+function formatRatio(
+  current: number | null | undefined,
+  target: number | null | undefined,
+  suffix = "",
+) {
+  const currentValue = current ?? 0;
+  const targetValue = target ?? 0;
+  const currentLabel = formatCompactMetric(currentValue);
+  const targetLabel = formatCompactMetric(targetValue);
+
+  return `${currentLabel}${suffix} / ${targetLabel}${suffix}`;
+}
+
+function formatDateChip(date: Date) {
+  const formatted = new Intl.DateTimeFormat("pt-BR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(date);
+
+  return formatted.replace(/ de ([a-zà-ú])/u, (_, letter: string) => ` de ${letter.toUpperCase()}`);
+}
+
+function formatTimeChip(date: Date) {
+  return new Intl.DateTimeFormat("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(date);
+}
+
+function getStatusToneClass(status: string) {
+  if (status === "Ativo") {
+    return "creator-card-status--positive";
+  }
+
+  if (status === "Atenção") {
+    return "creator-card-status--warning";
+  }
+
+  return "creator-card-status--negative";
+}
+
+function CreatorCard({ item }: { item: CreatorDirectoryItem }) {
+  const averageGoalProgress = getAverageGoalProgress(item);
+  const heartToneClassName = getHeartTone(averageGoalProgress);
+  const projectName = item.projects[0] ?? "Sem projeto";
+  const projectIcon = getProjectIcon(item.projects);
+  const tierLabel = (item.tierNum ?? item.tierLabel.replace(/\D+/g, "")) || "-";
+
+  const financialProgress = {
+    real: getProgress(item.receivables?.amountReal?.current, item.receivables?.amountReal?.contract),
+    tcc: getProgress(item.receivables?.amountTCC?.current, item.receivables?.amountTCC?.contract),
+  };
+
+  return (
+    <Link href={`/criadores/${item.id}`} className="creator-card-link group">
+      <article className="creator-card-v2">
+        <div className="creator-card-v2__glow" />
+        <div className="creator-card-v2__topbar">
+          <span className="creator-chip creator-chip--tier">
+            <Star className="size-3" />
+            Tier {tierLabel}
+          </span>
+
+          <div className={cn("creator-card-hearts", heartToneClassName)} aria-label={`Avaliação ${item.stars} de 5`}>
+            {Array.from({ length: 5 }).map((_, index) => (
+              <HeartIcon key={index} active={index < item.stars} />
+            ))}
+          </div>
+
+          <div className="creator-card-v2__topbar-spacer" />
+
+          <span className={cn("creator-chip creator-chip--status", getStatusToneClass(item.status))}>
+            {item.status}
+          </span>
+
+          <span className="creator-project-badge" title={projectName}>
+            {projectIcon ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={projectIcon} alt={projectName} />
+            ) : (
+              <span>{projectName.charAt(0)}</span>
+            )}
+          </span>
+        </div>
+
+        <div className="creator-card-v2__identity">
+          <CreatorAvatar
+            name={item.name}
+            initials={item.initials}
+            src={item.avatarUrl}
+            className="creator-card-v2__avatar"
+            fallbackClassName="text-[15px] font-semibold tracking-[0.08em]"
+            viewTransitionName={`avatar-${item.id}`}
+          />
+
+          <div className="creator-card-v2__identity-copy">
+            <span className="creator-card-v2__name">{item.name}</span>
+            <span className="creator-card-v2__id">{item.id}</span>
+          </div>
+        </div>
+
+        <div className="creator-card-v2__progress-list">
+          {(Object.keys(goalConfig) as GoalKey[]).map((goalKey) => {
+            const config = goalConfig[goalKey];
+            const goal =
+              goalKey === "liveHours"
+                ? item.goals?.liveHours
+                : goalKey === "longVideos"
+                  ? item.goals?.longVideos
+                  : item.goals?.shortVideos;
+            const realized = goalKey === "liveHours" ? goal?.realized : goal?.delivered;
+            const target = goal?.target;
+            const progress = getProgress(realized, target);
+            const Icon = config.icon;
+
+            return (
+              <div key={goalKey} className="creator-card-progress">
+                <span className={cn("creator-card-progress__icon", config.colorClassName)}>
+                  <Icon className="size-3" />
+                </span>
+                <div className="creator-card-progress__track">
+                  <span className="creator-card-progress__bar" style={{ width: `${progress}%` }} />
+                </div>
+                <span className="creator-card-progress__value">
+                  {formatRatio(realized, target, config.suffix)}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="creator-card-v2__finance">
+          <div className="creator-finance-item">
+            <div className="creator-finance-item__header">
+              <span>R$</span>
+              <span>{formatRatio(item.receivables?.amountReal?.current, item.receivables?.amountReal?.contract)}</span>
+            </div>
+            <div className="creator-finance-item__track">
+              <span className="creator-finance-item__bar creator-finance-item__bar--green" style={{ width: `${financialProgress.real}%` }} />
+            </div>
+          </div>
+
+          <div className="creator-finance-item">
+            <div className="creator-finance-item__header">
+              <span>TCC</span>
+              <span>{formatRatio(item.receivables?.amountTCC?.current, item.receivables?.amountTCC?.contract)}</span>
+            </div>
+            <div className="creator-finance-item__track">
+              <span className="creator-finance-item__bar creator-finance-item__bar--amber" style={{ width: `${financialProgress.tcc}%` }} />
+            </div>
+          </div>
+        </div>
+
+        <div className="creator-card-v2__footer">
+          <span className="creator-card-v2__metric">
+            <span className="creator-card-v2__metric-dot" />
+            {formatCompactMetric(item.monthlyInfo?.clicks)} / {formatCompactMetric(item.monthlyInfo?.convertedClicks)}
+          </span>
+          <span className="creator-card-v2__metric creator-card-v2__metric--positive">
+            R$ {formatCompactMetric(item.monthlyInfo?.couponUsageReal)}
+          </span>
+          <span className="creator-card-v2__metric creator-card-v2__metric--muted">
+            {formatCurrencyStat(item.receivables?.cashbackTCC)}
+          </span>
+          <span className="creator-card-v2__metric creator-card-v2__metric--time">{item.lastActivity}</span>
+        </div>
+      </article>
+    </Link>
+  );
+}
+
+function HeartIcon({ active }: { active: boolean }) {
+  return (
+    <svg
+      aria-hidden="true"
+      className={cn("creator-card-hearts__icon", active && "creator-card-hearts__icon--active")}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+    >
+      <path d="M12 21.35 10.55 20C5.4 15.24 2 12.09 2 8.24 2 5.09 4.42 2.7 7.5 2.7c1.74 0 3.41.81 4.5 2.08 1.09-1.27 2.76-2.08 4.5-2.08 3.08 0 5.5 2.39 5.5 5.54 0 3.85-3.4 7-8.55 11.77L12 21.35Z" />
+    </svg>
   );
 }
 
@@ -23,19 +320,16 @@ export function CreatorDirectory({ items }: { items: CreatorDirectoryItem[] }) {
   const [status, setStatus] = useState("Ativo");
   const [tier, setTier] = useState("all");
   const [project, setProject] = useState("all");
-  const [collapsedProjects, setCollapsedProjects] = useState<Record<string, boolean>>({});
+  const [snapshotNow] = useState(() => new Date());
   const deferredSearch = useDeferredValue(search);
-
-  const toggleProject = (project: string) => {
-    setCollapsedProjects(prev => ({
-      ...prev,
-      [project]: !prev[project]
-    }));
-  };
 
   const statuses = uniqueValues(items.map((item) => item.status));
   const tiers = uniqueValues(items.map((item) => item.tierLabel));
   const projects = uniqueValues(items.flatMap((item) => item.projects));
+
+  const statusOptions = [{ value: "all", label: "Todos" }, ...statuses.map((value) => ({ value, label: value }))];
+  const tierOptions = [{ value: "all", label: "Todos" }, ...tiers.map((value) => ({ value, label: value }))];
+  const projectOptions = [{ value: "all", label: "Todos" }, ...projects.map((value) => ({ value, label: value }))];
 
   const visibleItems = items.filter((item) => {
     const normalizedSearch = deferredSearch.trim().toLocaleLowerCase("pt-BR");
@@ -43,7 +337,8 @@ export function CreatorDirectory({ items }: { items: CreatorDirectoryItem[] }) {
       normalizedSearch.length === 0 ||
       item.name.toLocaleLowerCase("pt-BR").includes(normalizedSearch) ||
       item.nickname.toLocaleLowerCase("pt-BR").includes(normalizedSearch) ||
-      item.fullName.toLocaleLowerCase("pt-BR").includes(normalizedSearch);
+      item.fullName.toLocaleLowerCase("pt-BR").includes(normalizedSearch) ||
+      item.id.toLocaleLowerCase("pt-BR").includes(normalizedSearch);
 
     const matchesStatus = status === "all" || item.status === status;
     const matchesTier = tier === "all" || item.tierLabel === tier;
@@ -52,294 +347,65 @@ export function CreatorDirectory({ items }: { items: CreatorDirectoryItem[] }) {
     return matchesSearch && matchesStatus && matchesTier && matchesProject;
   });
 
-
-
-  const statusOptions = [{ value: "all", label: "Todos" }, ...statuses.map((value) => ({ value, label: value }))];
-  const tierOptions = [{ value: "all", label: "Todos" }, ...tiers.map((value) => ({ value, label: value }))];
-  const projectOptions = [{ value: "all", label: "Todos" }, ...projects.map((value) => ({ value, label: value }))];
-
-  // Group visible items by project
-  const itemsByProject = visibleItems.reduce((acc, item) => {
-    const project = item.projects.length > 0 ? item.projects[0] : "Sem Projeto";
-    if (!acc[project]) {
-      acc[project] = [];
-    }
-    acc[project].push(item);
-    return acc;
-  }, {} as Record<string, CreatorDirectoryItem[]>);
-
-  // Sort groups and inner items
-  const PROJECT_ORDER = ["PW A.S.", "PW 1.2.6", "PW 126", "PW 1.8.7", "PW 187", "MU", "L2 Midnight", "L2", "L2M"];
-  const PROJECT_ICONS: Record<string, string> = {
-    "PW A.S.": "/game-icons/pwas.png",
-    "PW 1.2.6": "/game-icons/pw126.png",
-    "PW 126": "/game-icons/pw126.png",
-    "PW 1.8.7": "/game-icons/pw187.png",
-    "PW 187": "/game-icons/pw187.png",
-    "MU": "/game-icons/mus21.png",
-    "L2 Midnight": "/game-icons/l2m.png",
-    "L2M": "/game-icons/l2m.png",
-    "L2": "/game-icons/l2m.png",
-  };
-  
-  const sortedProjects = Object.keys(itemsByProject).sort((a, b) => {
-    const indexA = PROJECT_ORDER.indexOf(a);
-    const indexB = PROJECT_ORDER.indexOf(b);
-    
-    if (indexA !== -1 && indexB !== -1) return indexA - indexB;
-    if (indexA !== -1) return -1;
-    if (indexB !== -1) return 1;
-    
-    return a.localeCompare(b, "pt-BR");
-  });
-  sortedProjects.forEach((key) => {
-    // Sort primarily by Tier (1 -> 2 -> 3)
-    itemsByProject[key].sort((a, b) => (a.tierNum ?? 3) - (b.tierNum ?? 3));
-  });
-
-return (
-    <div className="dashboard-shell">
-      <header className="creator-header">
-        <div className="creator-header-logo-wrapper">
-          <motion.img 
-            src="https://theclassic.games/assets/img/logo_theclassic.png" 
-            alt="The Classic Games"
-            className="creator-header-logo"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-          />
+  return (
+    <section className="creator-directory-page">
+      <header className="creator-toolbar" aria-label="Filtros de creators">
+        <div className="creator-toolbar__menu" aria-hidden="true">
+          <Menu className="size-5" />
         </div>
 
-        <div className="creator-header-search">
-          <Input 
-            className="creator-header-input"
-            placeholder="Buscar creators..."
+        <FilterSelect label="Status" value={status} options={statusOptions} onChange={setStatus} />
+        <FilterSelect label="Tier" value={tier} options={tierOptions} onChange={setTier} />
+        <FilterSelect
+          label="Projeto"
+          value={project}
+          options={projectOptions}
+          onChange={setProject}
+          gameIcons={PROJECT_ICONS}
+        />
+
+        <div className="creator-toolbar__search">
+          <Search className="creator-toolbar__search-icon size-4" />
+          <Input
+            aria-label="Buscar"
+            className="creator-toolbar__search-input"
+            placeholder="Nome ou The Classic ID"
             value={search}
-            onChange={(e) => startTransition(() => setSearch(e.target.value))}
+            onChange={(event) => startTransition(() => setSearch(event.target.value))}
           />
         </div>
 
-        <div className="creator-header-spacer" />
+        <div className="creator-toolbar__datetime">
+          <span className="creator-toolbar__datetime-chip">
+            <CalendarDays className="size-3.5" />
+            {formatDateChip(snapshotNow)}
+          </span>
+          <span className="creator-toolbar__datetime-chip creator-toolbar__datetime-chip--compact">
+            <Clock3 className="size-3.5" />
+            {formatTimeChip(snapshotNow)}
+          </span>
+        </div>
 
-        <div className="creator-header-filters">
-          <FilterSelect label="Status" value={status} options={statusOptions} onChange={setStatus} />
-          <FilterSelect label="Tier" value={tier} options={tierOptions} onChange={setTier} />
-          <FilterSelect label="Projeto" value={project} options={projectOptions} onChange={setProject} gameIcons={PROJECT_ICONS} />
+        <div className="creator-toolbar__brand" aria-hidden="true">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/figma-assets/logo-game.png" alt="" />
         </div>
       </header>
 
-      <div className="mt-8 space-y-12">
-        {sortedProjects.map((projectGroup) => {
-          const isCollapsed = collapsedProjects[projectGroup];
-          return (
-          <div key={projectGroup} className="space-y-4">
-            <button 
-              type="button"
-              onClick={() => toggleProject(projectGroup)}
-              className="w-full group flex items-center justify-between border-b border-white/5 pb-2 text-left"
-            >
-              <h2 className="text-xl font-semibold tracking-[-0.04em] text-white flex items-center gap-3">
-                <div className="flex size-8 items-center justify-center overflow-hidden rounded-full ring-1 ring-white/10 shrink-0 bg-black/20">
-                  {PROJECT_ICONS[projectGroup] ? (
-                    <img src={PROJECT_ICONS[projectGroup]} alt={projectGroup} className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-white/40 text-sm font-bold">{projectGroup.charAt(0)}</span>
-                  )}
-                </div>
-                {projectGroup}
-                <span className="text-sm font-normal text-white/40 ml-2">({itemsByProject[projectGroup].length} criadores)</span>
-              </h2>
-              <span className={cn("inline-flex items-center justify-center rounded-full bg-white/5 p-1 text-white/40 transition-transform duration-200 group-hover:bg-white/10 group-hover:text-white/80", isCollapsed ? "" : "rotate-180")}>
-                <svg className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </span>
-            </button>
-
-            {!isCollapsed && (
-            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-              {itemsByProject[projectGroup].map((item) => (
-                <Link key={item.id} href={`/criadores/${item.id}`} className="group block">
-                  <GlassPanel className="creator-card flex flex-col h-full p-4 !rounded-[16px] transition duration-200 group-hover:-translate-y-1 group-hover:border-white/18 group-hover:bg-white/[0.06] group-focus-visible:-translate-y-1 group-focus-visible:border-white/18">
-                    
-                    {/* Header */}
-                    <div className="flex items-center justify-between border-b border-white/8 pb-2 mb-3">
-                      <div className="flex items-center gap-2">
-                        <span className="creator-card__chip bg-white/[0.08] px-2 py-0.5 rounded text-[10px] font-bold text-white uppercase tracking-wider">
-                          Tier {item.tierNum}
-                        </span>
-                        <div className="flex space-x-0.5">
-                          {Array.from({ length: 5 }).map((_, i) => (
-                            <svg key={i} className={cn("size-3", i < (item.stars || 0) ? "text-yellow-400" : "text-white/20")} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                              <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
-                            </svg>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className={cn(
-                            "inline-flex h-[18px] items-center rounded-full px-2 text-[9px] font-semibold uppercase tracking-[0.16em]",
-                            item.status === "Ativo" ? "bg-[rgba(80,156,98,0.24)] text-[rgba(218,255,223,0.9)]" :
-                            item.status === "Atenção" ? "bg-[#B47413]/30 text-[#FFE0B2]" :
-                            "bg-[rgba(171,94,94,0.24)] text-[rgba(255,224,224,0.86)]"
-                          )}>
-                          {item.status}
-                        </span>
-                        <div className="flex size-6 items-center justify-center overflow-hidden rounded-full ring-1 ring-white/20 bg-black/40 shrink-0" title={projectGroup}>
-                          {PROJECT_ICONS[projectGroup] ? (
-                            <img src={PROJECT_ICONS[projectGroup]} alt={projectGroup} className="w-full h-full object-cover" />
-                          ) : (
-                            <span className="text-[10px] font-bold text-white/70">{projectGroup.charAt(0)}</span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Body: Avatar e Metas na mesma linha */}
-                    <div className="flex items-center gap-4 mb-3 rounded bg-white/[0.015] p-2 ring-1 ring-white/5">
-                      {/* Left: Identity */}
-                      <div className="flex flex-col items-center justify-center w-[84px] shrink-0">
-                        <CreatorAvatar
-                          name={item.name}
-                          initials={item.initials}
-                          src={item.avatarUrl}
-                          className="size-[56px] mb-2 ring-1 ring-white/10"
-                          fallbackClassName="text-[18px] font-semibold tracking-[0.1em]"
-                          viewTransitionName={`avatar-${item.id}`}
-                        />
-                        <p className="w-full truncate text-[13px] font-semibold tracking-[-0.04em] text-white text-center leading-tight">
-                          {item.name}
-                        </p>
-                        <p className="w-full truncate text-[11px] text-white/52 text-center mt-0.5">@{item.nickname}</p>
-                      </div>
-
-                      {/* Right: Goals Bars */}
-                      {item.goals ? (
-                        <div className="flex-1 flex flex-col justify-center gap-2.5">
-                          
-                          <div className="flex items-center gap-2">
-                            <div title="Horas de Live" className="shrink-0">
-                               <svg className="size-[16px] text-red-400 cursor-help" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
-                            </div>
-                            <div className="flex-1 flex items-center gap-2">
-                               <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden">
-                                  <div className="h-full bg-red-400 rounded-full transition-all duration-500" style={{ width: `${Math.min(100, ((item.goals.liveHours?.realized ?? 0) / (item.goals.liveHours?.target || 1)) * 100)}%` }}></div>
-                               </div>
-                               <span className="shrink-0 text-[12px] font-semibold text-white leading-none min-w-[42px] text-right">
-                                 {item.goals.liveHours?.realized ?? 0}<span className="text-white/40 font-normal">/{item.goals.liveHours?.target || 0}h</span>
-                               </span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-2">
-                            <div title="Vídeos Longos" className="shrink-0">
-                               <svg className="size-[16px] text-blue-400 cursor-help" fill="currentColor" viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-3.5V17H5V7h2v3.5l5-3.5v10zm7 0h-2V7h2v10z"/></svg>
-                            </div>
-                            <div className="flex-1 flex items-center gap-2">
-                               <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden">
-                                  <div className="h-full bg-blue-400 rounded-full transition-all duration-500" style={{ width: `${Math.min(100, ((item.goals.longVideos?.delivered ?? 0) / (item.goals.longVideos?.target || 1)) * 100)}%` }}></div>
-                               </div>
-                               <span className="shrink-0 text-[12px] font-semibold text-white leading-none min-w-[42px] text-right">
-                                 {item.goals.longVideos?.delivered ?? 0}<span className="text-white/40 font-normal">/{item.goals.longVideos?.target || 0}</span>
-                               </span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-2">
-                            <div title="Vídeos Curtos" className="shrink-0">
-                               <svg className="size-[16px] text-purple-400 cursor-help" fill="currentColor" viewBox="0 0 24 24"><path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/></svg>
-                            </div>
-                            <div className="flex-1 flex items-center gap-2">
-                               <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden">
-                                  <div className="h-full bg-purple-400 rounded-full transition-all duration-500" style={{ width: `${Math.min(100, ((item.goals.shortVideos?.delivered ?? 0) / (item.goals.shortVideos?.target || 1)) * 100)}%` }}></div>
-                               </div>
-                               <span className="shrink-0 text-[12px] font-semibold text-white leading-none min-w-[42px] text-right">
-                                 {item.goals.shortVideos?.delivered ?? 0}<span className="text-white/40 font-normal">/{item.goals.shortVideos?.target || 0}</span>
-                               </span>
-                            </div>
-                          </div>
-
-                        </div>
-                      ) : (
-                        <div className="flex-1 flex items-center justify-center text-[10px] text-white/20">Sem metas</div>
-                      )}
-                    </div>
-
-                    {/* Data Rows */}
-                    <div className="flex flex-col gap-2.5">
-
-                      {/* Financial Row */}
-                      {item.receivables && (
-                      <div className="flex gap-2">
-                        <div className="flex-1 rounded bg-white/[0.02] p-2.5 ring-1 ring-white/5 flex flex-col justify-center">
-                            <span className="text-[11px] text-white/40 uppercase font-medium tracking-wider mb-1">R$ base</span>
-                            <div className="flex items-baseline gap-1 mb-2">
-                              <span className="text-[15px] font-bold text-emerald-400 leading-none">
-                                {item.receivables?.amountReal?.current != null ? item.receivables.amountReal.current.toLocaleString("pt-BR") : "-"}
-                              </span>
-                              <span className="text-[11px] text-emerald-400/50 font-normal">/ {item.receivables?.amountReal?.contract != null ? item.receivables.amountReal.contract.toLocaleString("pt-BR") : "-"}</span>
-                            </div>
-                            <div className="h-1 w-full bg-black/40 rounded-full overflow-hidden">
-                             <div className="h-full bg-emerald-400 rounded-full transition-all duration-500" style={{ width: `${Math.min(100, ((item.receivables?.amountReal?.current ?? 0) / (item.receivables?.amountReal?.contract || 1)) * 100)}%` }}></div>
-                            </div>
-                        </div>
-                        <div className="flex-1 rounded bg-white/[0.02] p-2.5 ring-1 ring-white/5 flex flex-col justify-center">
-                            <span className="text-[11px] text-white/40 uppercase font-medium tracking-wider mb-1">TCC</span>
-                            <div className="flex items-baseline gap-1 mb-2">
-                              <span className="text-[15px] font-bold text-amber-400 leading-none">
-                                {item.receivables?.amountTCC?.current != null ? item.receivables.amountTCC.current.toLocaleString("pt-BR") : "-"}
-                              </span>
-                              <span className="text-[11px] text-amber-400/50 font-normal">/ {item.receivables?.amountTCC?.contract != null ? item.receivables.amountTCC.contract.toLocaleString("pt-BR") : "-"}</span>
-                            </div>
-                            <div className="h-1 w-full bg-black/40 rounded-full overflow-hidden">
-                             <div className="h-full bg-amber-400 rounded-full transition-all duration-500" style={{ width: `${Math.min(100, ((item.receivables?.amountTCC?.current ?? 0) / (item.receivables?.amountTCC?.contract || 1)) * 100)}%` }}></div>
-                            </div>
-                        </div>
-                      </div>
-                      )}
-                      
-                      {/* Sub-metrics (Clicks, Coupon, Cashback) & Footer */}
-                      <div className="flex items-center justify-between mt-1 px-1">
-                        <div className="flex items-center gap-3">
-                          <div title="Cliques / Cap" className="flex items-center gap-1.5">
-                            <svg className="size-3.5 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                            <span className="text-[11px] font-medium text-white/80">{item.monthlyInfo?.clicks ?? "-"} <span className="text-white/30 font-normal">/ {item.monthlyInfo?.convertedClicks ?? "cap"}</span></span>
-                          </div>
-                          <div title="Uso do Cupom (R$)" className="flex items-center gap-1.5">
-                            <svg className="size-3.5 text-emerald-400/70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
-                            <span className="text-[11px] font-medium text-emerald-400">{item.monthlyInfo?.couponUsageReal != null ? `R$ ${item.monthlyInfo.couponUsageReal.toLocaleString("pt-BR")}` : "-"}</span>
-                          </div>
-                          <div title="Cashback TCC" className="flex items-center gap-1.5">
-                            <svg className="size-3.5 text-[#A6C0CA]/70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            <span className="text-[11px] font-medium text-[#A6C0CA]">{item.receivables?.cashbackTCC != null ? item.receivables.cashbackTCC.toLocaleString("pt-BR") : "-"}</span>
-                          </div>
-                        </div>
-                        <div className="text-[9px] text-white/30 truncate max-w-[80px] text-right" title={`Última atividade: ${item.lastActivity}`}>
-                            {item.lastActivity}
-                        </div>
-                      </div>
-                    </div>
-                  </GlassPanel>
-                </Link>
-              ))}
+      {visibleItems.length > 0 ? (
+        <div className="creator-grid" role="list" aria-label="Lista de creators">
+          {visibleItems.map((item) => (
+            <div key={item.id} role="listitem">
+              <CreatorCard item={item} />
             </div>
-            )}
-          </div>
-        );
-      })}
-      </div>
-
-      {visibleItems.length === 0 ? (
-        <GlassPanel className="mt-6 p-8 text-center">
-          <p className="text-[18px] font-semibold tracking-[-0.04em] text-white">
-            Nenhum criador encontrado
-          </p>
-          <p className="mt-2 text-[14px] text-white/58">
-            Ajuste os filtros ou limpe a busca para ver mais resultados.
-          </p>
-        </GlassPanel>
-      ) : null}
-    </div>
+          ))}
+        </div>
+      ) : (
+        <div className="creator-empty-state">
+          <span className="creator-empty-state__title">Nenhum creator encontrado</span>
+          <span className="creator-empty-state__copy">Ajuste os filtros ou limpe a busca para ver mais resultados.</span>
+        </div>
+      )}
+    </section>
   );
 }
