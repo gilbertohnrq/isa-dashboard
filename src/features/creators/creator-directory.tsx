@@ -27,6 +27,8 @@ const PROJECT_ICONS: Record<string, string> = {
   L2: "/game-icons/l2m.png",
 };
 
+const PROJECT_ORDER = ["PW A.S.", "PW 1.2.6", "PW 126", "PW 1.8.7", "PW 187", "MU", "L2 Midnight", "L2", "L2M"];
+
 type GoalKey = "liveHours" | "longVideos" | "shortVideos";
 
 function EyeGlyph({ className }: { className?: string }) {
@@ -359,7 +361,15 @@ export function CreatorDirectory({ items }: { items: CreatorDirectoryItem[] }) {
   const [status, setStatus] = useState("Ativo");
   const [tier, setTier] = useState("all");
   const [project, setProject] = useState("all");
+  const [collapsedProjects, setCollapsedProjects] = useState<Record<string, boolean>>({});
   const [snapshotNow, setSnapshotNow] = useState(() => new Date());
+
+  const toggleProject = (projectName: string) => {
+    setCollapsedProjects((prev) => ({
+      ...prev,
+      [projectName]: !prev[projectName],
+    }));
+  };
 
   useEffect(() => {
     const interval = setInterval(() => setSnapshotNow(new Date()), 1000);
@@ -389,6 +399,26 @@ export function CreatorDirectory({ items }: { items: CreatorDirectoryItem[] }) {
     const matchesProject = project === "all" || item.projects.includes(project);
 
     return matchesSearch && matchesStatus && matchesTier && matchesProject;
+  });
+
+  const itemsByProject = visibleItems.reduce<Record<string, CreatorDirectoryItem[]>>((acc, item) => {
+    const group = item.projects.length > 0 ? item.projects[0] : "Sem Projeto";
+    if (!acc[group]) acc[group] = [];
+    acc[group].push(item);
+    return acc;
+  }, {});
+
+  const sortedProjects = Object.keys(itemsByProject).sort((a, b) => {
+    const ia = PROJECT_ORDER.indexOf(a);
+    const ib = PROJECT_ORDER.indexOf(b);
+    if (ia !== -1 && ib !== -1) return ia - ib;
+    if (ia !== -1) return -1;
+    if (ib !== -1) return 1;
+    return a.localeCompare(b, "pt-BR");
+  });
+
+  sortedProjects.forEach((key) => {
+    itemsByProject[key].sort((a, b) => (a.tierNum ?? 3) - (b.tierNum ?? 3));
   });
 
   return (
@@ -436,13 +466,56 @@ export function CreatorDirectory({ items }: { items: CreatorDirectoryItem[] }) {
         </div>
       </header>
 
-      {visibleItems.length > 0 ? (
-        <div className="creator-grid" role="list" aria-label="Lista de creators">
-          {visibleItems.map((item) => (
-            <div key={item.id} role="listitem">
-              <CreatorCard item={item} />
-            </div>
-          ))}
+      {sortedProjects.length > 0 ? (
+        <div className="creator-sections">
+          {sortedProjects.map((projectGroup) => {
+            const isCollapsed = collapsedProjects[projectGroup] ?? false;
+            const groupItems = itemsByProject[projectGroup];
+            const projectIcon = PROJECT_ICONS[projectGroup] ?? null;
+            return (
+              <div key={projectGroup} className="creator-game-section">
+                <button
+                  type="button"
+                  className="creator-game-section__header"
+                  onClick={() => toggleProject(projectGroup)}
+                  aria-expanded={!isCollapsed}
+                >
+                  <span className="creator-game-section__icon">
+                    {projectIcon ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={projectIcon} alt={projectGroup} />
+                    ) : (
+                      <span className="creator-game-section__icon-fallback">{projectGroup.charAt(0)}</span>
+                    )}
+                  </span>
+                  <span className="creator-game-section__title">{projectGroup}</span>
+                  <span className="creator-game-section__count">
+                    {groupItems.length} {groupItems.length === 1 ? "creator" : "creators"}
+                  </span>
+                  <span className="creator-game-section__spacer" />
+                  <svg
+                    className={cn("creator-game-section__chevron", !isCollapsed && "creator-game-section__chevron--expanded")}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {!isCollapsed && (
+                  <div className="creator-grid" role="list" aria-label={`Creators de ${projectGroup}`}>
+                    {groupItems.map((item) => (
+                      <div key={item.id} role="listitem">
+                        <CreatorCard item={item} />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       ) : (
         <div className="creator-empty-state">
