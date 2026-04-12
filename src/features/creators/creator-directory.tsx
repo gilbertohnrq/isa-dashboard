@@ -5,8 +5,10 @@ import { Link } from "next-view-transitions";
 import {
   CalendarDays,
   Clock3,
+  Coins,
   Menu,
   Search,
+  Ticket,
 } from "lucide-react";
 
 import { CreatorAvatar } from "@/features/creators/creator-avatar";
@@ -40,42 +42,26 @@ function EyeGlyph({ className }: { className?: string }) {
   );
 }
 
-function DiamondGlyph({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M12 2 2 9l10 13 10-13-10-7Z" />
-    </svg>
-  );
-}
-
 const goalConfig: Record<
   GoalKey,
   {
     label: string;
     iconSrc: string;
-    colorClassName: string;
-    currentColorClassName: string;
     suffix?: string;
   }
 > = {
   liveHours: {
     label: "Live",
     iconSrc: "/figma-assets/icon-live.svg",
-    colorClassName: "creator-card-progress__icon--ruby",
-    currentColorClassName: "creator-card-progress__current--ruby",
     suffix: "h",
   },
   longVideos: {
     label: "Longos",
     iconSrc: "/figma-assets/icon-longvideo.svg",
-    colorClassName: "creator-card-progress__icon--lime",
-    currentColorClassName: "creator-card-progress__current--lime",
   },
   shortVideos: {
     label: "Curtos",
     iconSrc: "/figma-assets/icon-shortvideo.svg",
-    colorClassName: "creator-card-progress__icon--rose",
-    currentColorClassName: "creator-card-progress__current--rose",
   },
 };
 
@@ -83,11 +69,6 @@ function uniqueValues(values: string[]) {
   return [...new Set(values.filter(Boolean))].sort((left, right) =>
     left.localeCompare(right, "pt-BR"),
   );
-}
-
-function getProjectIcon(projects: string[]) {
-  const project = projects[0];
-  return project ? PROJECT_ICONS[project] ?? null : null;
 }
 
 function getProgress(realized: number | null | undefined, target: number | null | undefined) {
@@ -98,34 +79,21 @@ function getProgress(realized: number | null | undefined, target: number | null 
   return Math.max(0, Math.min(100, (realized / target) * 100));
 }
 
-function getAverageGoalProgress(item: CreatorDirectoryItem) {
-  if (!item.goals) {
-    return 0;
-  }
-
-  const values = [
-    getProgress(item.goals.liveHours?.realized, item.goals.liveHours?.target),
-    getProgress(item.goals.longVideos?.delivered, item.goals.longVideos?.target),
-    getProgress(item.goals.shortVideos?.delivered, item.goals.shortVideos?.target),
-  ].filter((value) => value > 0);
-
-  if (values.length === 0) {
-    return 0;
-  }
-
-  return values.reduce((total, value) => total + value, 0) / values.length;
+function getHeartTone(stars: number) {
+  if (stars >= 4) return "creator-card-hearts--green";
+  if (stars >= 3) return "creator-card-hearts--amber";
+  return "creator-card-hearts--red";
 }
 
-function getHeartTone(progress: number) {
-  if (progress >= 90) {
-    return "creator-card-hearts--green";
-  }
+function getEffectiveStatus(item: CreatorDirectoryItem) {
+  if (item.status === "Ativo" && item.stars < 4) return "Atenção";
+  return item.status;
+}
 
-  if (progress >= 60) {
-    return "creator-card-hearts--amber";
-  }
-
-  return "creator-card-hearts--red";
+function getGoalProgressClass(progress: number) {
+  if (progress >= 100) return "creator-card-progress--green";
+  if (progress >= 60) return "creator-card-progress--amber";
+  return "creator-card-progress--red";
 }
 
 function formatCompactMetric(value: number | null | undefined) {
@@ -192,10 +160,8 @@ function getStatusToneClass(status: string) {
 }
 
 function CreatorCard({ item }: { item: CreatorDirectoryItem }) {
-  const averageGoalProgress = getAverageGoalProgress(item);
-  const heartToneClassName = getHeartTone(averageGoalProgress);
-  const projectName = item.projects[0] ?? "Sem projeto";
-  const projectIcon = getProjectIcon(item.projects);
+  const heartToneClassName = getHeartTone(item.stars);
+  const effectiveStatus = getEffectiveStatus(item);
   const tierLabel = (item.tierNum ?? item.tierLabel.replace(/\D+/g, "")) || "-";
 
   const financialProgress = {
@@ -220,18 +186,23 @@ function CreatorCard({ item }: { item: CreatorDirectoryItem }) {
 
           <div className="creator-card-v2__topbar-spacer" />
 
-          <span className={cn("creator-chip creator-chip--status", getStatusToneClass(item.status))}>
-            {item.status}
+          <span className={cn("creator-chip creator-chip--status", getStatusToneClass(effectiveStatus))}>
+            {effectiveStatus}
           </span>
 
-          <span className="creator-project-badge" title={projectName}>
-            {projectIcon ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={projectIcon} alt={projectName} />
-            ) : (
-              <span>{projectName.charAt(0)}</span>
-            )}
-          </span>
+          {item.projects.map((proj) => {
+            const icon = PROJECT_ICONS[proj] ?? null;
+            return (
+              <span key={proj} className="creator-project-badge" title={proj}>
+                {icon ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={icon} alt={proj} />
+                ) : (
+                  <span>{proj.charAt(0)}</span>
+                )}
+              </span>
+            );
+          })}
         </div>
 
         <div className="creator-card-v2__body">
@@ -273,8 +244,8 @@ function CreatorCard({ item }: { item: CreatorDirectoryItem }) {
               const suffix = config.suffix ?? "";
 
               return (
-                <div key={goalKey} className="creator-card-progress">
-                  <span className={cn("creator-card-progress__icon", config.colorClassName)}>
+                <div key={goalKey} className={cn("creator-card-progress", getGoalProgressClass(progress))}>
+                  <span className="creator-card-progress__icon">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={config.iconSrc} alt="" className="size-3 object-contain" />
                   </span>
@@ -282,7 +253,7 @@ function CreatorCard({ item }: { item: CreatorDirectoryItem }) {
                     <span className="creator-card-progress__bar" style={{ width: `${progress}%` }} />
                   </div>
                   <span className="creator-card-progress__value">
-                    <span className={cn("creator-card-progress__value-current", config.currentColorClassName)}>{currentLabel}{suffix}</span>
+                    <span className="creator-card-progress__value-current">{currentLabel}{suffix}</span>
                     <span className="creator-card-progress__value-target"> / {targetLabel}{suffix}</span>
                   </span>
                 </div>
@@ -325,11 +296,11 @@ function CreatorCard({ item }: { item: CreatorDirectoryItem }) {
             {formatCompactMetric(item.monthlyInfo?.clicks)} / {formatCompactMetric(item.monthlyInfo?.convertedClicks)}
           </span>
           <span className="creator-card-v2__metric creator-card-v2__metric--positive">
-            <DiamondGlyph className="creator-card-v2__metric-icon" />
+            <Ticket className="creator-card-v2__metric-icon" />
             R$ {formatCompactMetric(item.monthlyInfo?.couponUsageReal)}
           </span>
           <span className="creator-card-v2__metric creator-card-v2__metric--muted">
-            <DiamondGlyph className="creator-card-v2__metric-icon" />
+            <Coins className="creator-card-v2__metric-icon" />
             {formatCurrencyStat(item.receivables?.cashbackTCC)}
           </span>
           <span className="creator-card-v2__metric creator-card-v2__metric--time">{item.lastActivity}</span>
@@ -358,7 +329,7 @@ function HeartIcon({ active }: { active: boolean }) {
 
 export function CreatorDirectory({ items }: { items: CreatorDirectoryItem[] }) {
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("Ativo");
+  const [status, setStatus] = useState("active");
   const [tier, setTier] = useState("all");
   const [project, setProject] = useState("all");
   const [collapsedProjects, setCollapsedProjects] = useState<Record<string, boolean>>({});
@@ -377,11 +348,11 @@ export function CreatorDirectory({ items }: { items: CreatorDirectoryItem[] }) {
   }, []);
   const deferredSearch = useDeferredValue(search);
 
-  const statuses = uniqueValues(items.map((item) => item.status));
+  const statuses = uniqueValues(items.map((item) => getEffectiveStatus(item)));
   const tiers = uniqueValues(items.map((item) => item.tierLabel));
   const projects = uniqueValues(items.flatMap((item) => item.projects));
 
-  const statusOptions = [{ value: "all", label: "Todos" }, ...statuses.map((value) => ({ value, label: value }))];
+  const statusOptions = [{ value: "active", label: "Ativo + Atenção" }, { value: "all", label: "Todos" }, ...statuses.map((value) => ({ value, label: value }))];
   const tierOptions = [{ value: "all", label: "Todos" }, ...tiers.map((value) => ({ value, label: value }))];
   const projectOptions = [{ value: "all", label: "Todos" }, ...projects.map((value) => ({ value, label: value }))];
 
@@ -394,7 +365,8 @@ export function CreatorDirectory({ items }: { items: CreatorDirectoryItem[] }) {
       item.fullName.toLocaleLowerCase("pt-BR").includes(normalizedSearch) ||
       item.id.toLocaleLowerCase("pt-BR").includes(normalizedSearch);
 
-    const matchesStatus = status === "all" || item.status === status;
+    const effectiveStatus = getEffectiveStatus(item);
+    const matchesStatus = status === "all" || (status === "active" && (effectiveStatus === "Ativo" || effectiveStatus === "Atenção")) || effectiveStatus === status;
     const matchesTier = tier === "all" || item.tierLabel === tier;
     const matchesProject = project === "all" || item.projects.includes(project);
 
@@ -402,9 +374,11 @@ export function CreatorDirectory({ items }: { items: CreatorDirectoryItem[] }) {
   });
 
   const itemsByProject = visibleItems.reduce<Record<string, CreatorDirectoryItem[]>>((acc, item) => {
-    const group = item.projects.length > 0 ? item.projects[0] : "Sem Projeto";
-    if (!acc[group]) acc[group] = [];
-    acc[group].push(item);
+    const groups = item.projects.length > 0 ? item.projects : ["Sem Projeto"];
+    for (const group of groups) {
+      if (!acc[group]) acc[group] = [];
+      acc[group].push(item);
+    }
     return acc;
   }, {});
 

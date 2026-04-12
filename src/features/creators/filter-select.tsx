@@ -17,7 +17,7 @@ type FilterSelectProps = {
 };
 
 function StatusIcon({ value }: { value: string }) {
-  if (value === "Ativo") {
+  if (value === "Ativo" || value === "Ativo + Atenção") {
     return (
       <svg className="filter-chip-icon-svg" viewBox="0 0 24 24" fill="currentColor">
         <circle cx="12" cy="12" r="7" />

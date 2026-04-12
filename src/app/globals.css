@@ -153,13 +153,13 @@ button:disabled {
   position: fixed;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(5, 9, 17, 0.08), rgba(5, 9, 17, 0.28)),
+    linear-gradient(180deg, rgba(5, 9, 17, 0.38), rgba(5, 9, 17, 0.58)),
     url("/figma-assets/background.jpg");
   background-position: center top;
   background-repeat: no-repeat;
   background-size: cover;
   background-attachment: fixed;
-  filter: saturate(1.08) brightness(0.9) contrast(1.0);
+  filter: saturate(1.08) brightness(0.72) contrast(1.0);
 }
 
 .app-frame--directory::after {
@@ -922,7 +922,8 @@ button:disabled {
 .creator-card-v2__identity {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+  text-align: center;
   gap: 6px;
 }
 
@@ -979,16 +980,22 @@ button:disabled {
   color: rgba(255, 255, 255, 0.78);
 }
 
-.creator-card-progress__icon--ruby {
+.creator-card-progress--red .creator-card-progress__icon,
+.creator-card-progress--red .creator-card-progress__bar,
+.creator-card-progress--red .creator-card-progress__value-current {
   color: #ff5c66;
 }
 
-.creator-card-progress__icon--lime {
-  color: #5ce87a;
+.creator-card-progress--amber .creator-card-progress__icon,
+.creator-card-progress--amber .creator-card-progress__bar,
+.creator-card-progress--amber .creator-card-progress__value-current {
+  color: #ffaf52;
 }
 
-.creator-card-progress__icon--rose {
-  color: #ff7070;
+.creator-card-progress--green .creator-card-progress__icon,
+.creator-card-progress--green .creator-card-progress__bar,
+.creator-card-progress--green .creator-card-progress__value-current {
+  color: #5ce87a;
 }
 
 .creator-card-progress__track {
@@ -1022,17 +1029,6 @@ button:disabled {
   background: linear-gradient(90deg, currentColor, color-mix(in srgb, currentColor 85%, white 15%));
 }
 
-.creator-card-progress__icon--ruby + .creator-card-progress__track .creator-card-progress__bar {
-  color: #ff5c66;
-}
-
-.creator-card-progress__icon--lime + .creator-card-progress__track .creator-card-progress__bar {
-  color: #5ce87a;
-}
-
-.creator-card-progress__icon--rose + .creator-card-progress__track .creator-card-progress__bar {
-  color: #ff7070;
-}
 
 .creator-card-progress__value {
   font-size: 12px;
@@ -1040,9 +1036,6 @@ button:disabled {
   white-space: nowrap;
 }
 
-.creator-card-progress__current--ruby { color: #ff5c66; }
-.creator-card-progress__current--lime { color: #5ce87a; }
-.creator-card-progress__current--rose { color: #ff7070; }
 
 .creator-card-progress__value-target {
   color: rgba(255, 255, 255, 0.35);
