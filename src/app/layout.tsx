@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { AppProviders } from "@/app/providers";
-import { unstable_ViewTransition as ViewTransition } from "react";
+import { ViewTransitions } from "next-view-transitions";
 
 import "./globals.css";
 
@@ -21,9 +21,9 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body>
-        <ViewTransition>
+        <ViewTransitions>
           <AppProviders>{children}</AppProviders>
-        </ViewTransition>
+        </ViewTransitions>
       </body>
     </html>
   );
