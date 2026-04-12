@@ -9,6 +9,7 @@ export function CreatorAvatar({
   className,
   imageClassName,
   fallbackClassName,
+  viewTransitionName,
 }: {
   name: string;
   initials: string;
@@ -16,6 +17,7 @@ export function CreatorAvatar({
   className?: string;
   imageClassName?: string;
   fallbackClassName?: string;
+  viewTransitionName?: string;
 }) {
   return (
     <div
@@ -23,6 +25,7 @@ export function CreatorAvatar({
         "relative overflow-hidden rounded-full border border-white/10 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.16),rgba(255,255,255,0.02)_52%),linear-gradient(180deg,rgba(79,125,73,0.35),rgba(16,20,24,0.94))]",
         className,
       )}
+      style={viewTransitionName ? { viewTransitionName } : undefined}
     >
       {src ? (
         src.startsWith("/") ? (

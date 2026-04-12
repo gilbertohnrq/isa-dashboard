@@ -22,10 +22,11 @@ export function PartnerWorkspacePage({
   snapshot,
 }: {
   section: CreatorSection;
-  criadorId: string;
+  criaturaId: string;
   snapshot: PartnerDashboardSnapshot;
 }) {
   const navigation = getCreatorSectionLinks(criadorId, section);
+  const viewTransitionName = `avatar-${criadorId}`;
 
   return (
     <WorkspaceFrame>
@@ -38,7 +39,7 @@ export function PartnerWorkspacePage({
         />
 
         <div className="mt-5">
-          {section === "dashboard" ? renderOverview(snapshot) : renderSection(snapshot, section)}
+          {section === "dashboard" ? renderOverview(snapshot, viewTransitionName) : renderSection(snapshot, section)}
         </div>
 
         <Footer copyright={snapshot.footer} />
@@ -47,8 +48,8 @@ export function PartnerWorkspacePage({
   );
 }
 
-function renderOverview(snapshot: PartnerDashboardSnapshot) {
-  return <DashboardView snapshot={snapshot} />;
+function renderOverview(snapshot: PartnerDashboardSnapshot, viewTransitionName?: string) {
+  return <DashboardView snapshot={snapshot} viewTransitionName={viewTransitionName} />;
 }
 
 function renderSection(snapshot: PartnerDashboardSnapshot, section: Exclude<CreatorSection, "dashboard">) {

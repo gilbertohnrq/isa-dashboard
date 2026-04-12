@@ -31,7 +31,7 @@ function EmptyState({
   );
 }
 
-export function ProfileCard({ snapshot }: { snapshot: PartnerDashboardSnapshot["profile"] }) {
+export function ProfileCard({ snapshot, viewTransitionName }: { snapshot: PartnerDashboardSnapshot["profile"]; viewTransitionName?: string }) {
   return (
     <GlassPanel className="h-auto p-[18px] xl:h-[490px]">
       <h2 className="dashboard-text-title">{snapshot.title}</h2>
@@ -42,6 +42,7 @@ export function ProfileCard({ snapshot }: { snapshot: PartnerDashboardSnapshot["
           src={snapshot.imageSrc}
           className="size-[252px] xl:size-[349px]"
           fallbackClassName="text-[54px] font-semibold tracking-[0.16em] xl:text-[74px]"
+          viewTransitionName={viewTransitionName}
         />
         <div className="glass-button-shell mt-4 flex min-h-[34px] min-w-[92px] items-center justify-center rounded-full px-4 py-2 text-center text-[16px] font-[590] text-white">
           {snapshot.name}

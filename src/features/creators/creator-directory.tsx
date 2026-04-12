@@ -206,6 +206,7 @@ return (
                           src={item.avatarUrl}
                           className="size-[56px] mb-2 ring-1 ring-white/10"
                           fallbackClassName="text-[18px] font-semibold tracking-[0.1em]"
+                          viewTransitionName={`avatar-${item.id}`}
                         />
                         <p className="w-full truncate text-[13px] font-semibold tracking-[-0.04em] text-white text-center leading-tight">
                           {item.name}

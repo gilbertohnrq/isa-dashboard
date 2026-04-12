@@ -12,14 +12,16 @@ import {
 
 export function DashboardView({
   snapshot,
+  viewTransitionName,
 }: {
   snapshot: PartnerDashboardSnapshot;
+  viewTransitionName?: string;
 }) {
   return (
     <>
       <div className="flex flex-col gap-5 xl:flex-row xl:gap-[var(--shell-gap)]">
         <div className="order-2 flex w-full flex-col gap-5 xl:order-1 xl:w-[var(--sidebar-width)] xl:gap-[var(--sidebar-gap)]">
-          <ProfileCard snapshot={snapshot.profile} />
+          <ProfileCard snapshot={snapshot.profile} viewTransitionName={viewTransitionName} />
           <LogCard snapshot={snapshot.log} />
         </div>
         <div className="order-1 flex min-w-0 flex-1 flex-col gap-5 xl:order-2 xl:gap-[var(--content-gap)]">
