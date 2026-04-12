@@ -39,7 +39,9 @@ export function PartnerWorkspacePage({
         />
 
         <div className="mt-5">
-          {section === "dashboard" ? renderOverview(snapshot, viewTransitionName) : renderSection(snapshot, section)}
+          {section === "dashboard"
+            ? renderOverview(snapshot, viewTransitionName)
+            : renderSection(snapshot, section, viewTransitionName)}
         </div>
 
         <Footer copyright={snapshot.footer} />
@@ -52,7 +54,11 @@ function renderOverview(snapshot: PartnerDashboardSnapshot, viewTransitionName?:
   return <DashboardView snapshot={snapshot} viewTransitionName={viewTransitionName} />;
 }
 
-function renderSection(snapshot: PartnerDashboardSnapshot, section: Exclude<CreatorSection, "dashboard">) {
+function renderSection(
+  snapshot: PartnerDashboardSnapshot,
+  section: Exclude<CreatorSection, "dashboard">,
+  viewTransitionName?: string,
+) {
   if (section === "conteudos") {
     return (
       <div className="flex flex-col gap-6 xl:gap-[var(--content-gap)]">
@@ -80,7 +86,7 @@ function renderSection(snapshot: PartnerDashboardSnapshot, section: Exclude<Crea
   return (
     <div className="flex flex-col gap-6 xl:gap-[var(--content-gap)]">
       <div className="grid grid-cols-1 gap-6 2xl:grid-cols-[minmax(0,420px)_minmax(0,1fr)]">
-        <ProfileCard snapshot={snapshot.profile} />
+        <ProfileCard snapshot={snapshot.profile} viewTransitionName={viewTransitionName} />
         <DataCard snapshot={snapshot.partnerData} />
       </div>
       <LogCard snapshot={snapshot.log} />
