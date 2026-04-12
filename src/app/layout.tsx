@@ -7,6 +7,9 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "The Classic Games Partner Dashboard",
   description: "Partner dashboard implemented from Figma with a glass design system.",
+  icons: {
+    icon: "https://theclassic.games/assets/img/logo_theclassic.png",
+  },
 };
 
 export default function RootLayout({

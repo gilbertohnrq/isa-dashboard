@@ -1,12 +1,17 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
-
-import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type FilterOption = {
   value: string;
   label: string;
+  icon?: string; // image URL for game icons
 };
 
 type FilterSelectProps = {
@@ -14,83 +19,136 @@ type FilterSelectProps = {
   value: string;
   options: FilterOption[];
   onChange: (value: string) => void;
+  gameIcons?: Record<string, string>;
 };
 
-export function FilterSelect({ label, value, options, onChange }: FilterSelectProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement | null>(null);
-  const listboxId = useId();
+/* ── Status icons change based on selected value ── */
+function StatusIcon({ value }: { value: string }) {
+  if (value === "Ativo") {
+    return (
+      <svg className="filter-chip-icon-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
+      </svg>
+    );
+  }
+  if (value === "Atenção") {
+    return (
+      <svg className="filter-chip-icon-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
+      </svg>
+    );
+  }
+  if (value === "Encerrado" || value === "Inativo") {
+    return (
+      <svg className="filter-chip-icon-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
+      </svg>
+    );
+  }
+  // "Todos" / default - circle with dots
+  return (
+    <svg className="filter-chip-icon-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path d="M8 12h.01M12 12h.01M16 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
+    </svg>
+  );
+}
 
-  const selectedOption =
-    options.find((option) => option.value === value) ?? options[0] ?? { value, label: value };
+/* ── Tier icon - Stitch sliders ── */
+function TierIcon() {
+  return (
+    <svg className="filter-chip-icon-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
+    </svg>
+  );
+}
 
-  useEffect(() => {
-    function handlePointerDown(event: PointerEvent) {
-      if (!rootRef.current?.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    }
+/* ── Projeto icon - TCG logo default, game icon when filtered ── */
+function ProjetoIcon({ value, gameIcons }: { value: string; gameIcons?: Record<string, string> }) {
+  const gameIcon = gameIcons?.[value];
+  if (gameIcon) {
+    return (
+      <img
+        src={gameIcon}
+        alt={value}
+        className="filter-chip-game-img"
+      />
+    );
+  }
+  // Default: show TCG logo
+  return (
+    <img
+      src="https://theclassic.games/assets/img/logo_theclassic.png"
+      alt="The Classic Games"
+      className="filter-chip-game-img"
+      style={{ filter: "brightness(0) invert(1)", padding: "8px", objectFit: "contain" }}
+    />
+  );
+}
 
-    function handleEscape(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        setIsOpen(false);
-      }
-    }
+function getStatusColorClass(value: string) {
+  switch (value) {
+    case "Ativo": return "filter-chip-icon--green";
+    case "Atenção": return "filter-chip-icon--amber";
+    case "Encerrado":
+    case "Inativo": return "filter-chip-icon--red";
+    default: return "filter-chip-icon--green";
+  }
+}
 
-    document.addEventListener("pointerdown", handlePointerDown);
-    document.addEventListener("keydown", handleEscape);
+export function FilterSelect({ label, value, options, onChange, gameIcons }: FilterSelectProps) {
+  const isStatus = label === "Status";
+  const isTier = label === "Tier";
+  const isProjeto = label === "Projeto";
 
-    return () => {
-      document.removeEventListener("pointerdown", handlePointerDown);
-      document.removeEventListener("keydown", handleEscape);
-    };
-  }, []);
+  const selectedLabel = options.find(o => o.value === value)?.label ?? value;
+
+  let iconColorClass = "filter-chip-icon--green";
+  if (isStatus) iconColorClass = getStatusColorClass(selectedLabel);
+  if (isTier) iconColorClass = "filter-chip-icon--accent";
+  if (isProjeto) {
+    const hasGameIcon = gameIcons?.[value];
+    iconColorClass = hasGameIcon ? "filter-chip-icon--game" : "filter-chip-icon--muted";
+  }
 
   return (
-    <div ref={rootRef} className="creator-filter-field">
-      <label className="creator-filter-field__label">{label}</label>
-      <div className="creator-filter-select">
-        <button
-          type="button"
-          className={cn("creator-filter-select__trigger", isOpen && "creator-filter-select__trigger--open")}
-          aria-expanded={isOpen}
-          aria-haspopup="listbox"
-          aria-controls={listboxId}
-          onClick={() => setIsOpen((current) => !current)}
-        >
-          <span className="truncate">{selectedOption.label}</span>
-          <span className={cn("creator-filter-select__chevron", isOpen && "creator-filter-select__chevron--open")}>
-            ▾
-          </span>
-        </button>
-
-        {isOpen ? (
-          <div id={listboxId} role="listbox" className="creator-filter-select__menu">
-            {options.map((option) => {
-              const isSelected = option.value === value;
-
-              return (
-                <button
-                  key={option.value}
-                  type="button"
-                  role="option"
-                  aria-selected={isSelected}
-                  className={cn(
-                    "creator-filter-select__option",
-                    isSelected && "creator-filter-select__option--selected",
+    <div className="filter-chip">
+      <div className={`filter-chip-icon ${iconColorClass}`}>
+        {isStatus && <StatusIcon value={selectedLabel} />}
+        {isTier && <TierIcon />}
+        {isProjeto && <ProjetoIcon value={value} gameIcons={gameIcons} />}
+      </div>
+      <div className="filter-chip-body">
+        <span className="filter-chip-label">{label}</span>
+        <Select value={value} onValueChange={onChange}>
+          <SelectTrigger className="filter-chip-trigger">
+            <SelectValue placeholder={label} />
+          </SelectTrigger>
+          <SelectContent className="filter-chip-content">
+            {options.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                <span className="filter-chip-option">
+                  {isProjeto && (
+                    gameIcons?.[option.value] ? (
+                      <img
+                        src={gameIcons[option.value]}
+                        alt={option.label}
+                        className="filter-chip-option-icon"
+                      />
+                    ) : (
+                      <img
+                        src="https://theclassic.games/assets/img/logo_theclassic.png"
+                        alt="TCG"
+                        className="filter-chip-option-icon"
+                        style={{ filter: "brightness(0) invert(1)", objectFit: "contain", padding: "2px" }}
+                      />
+                    )
                   )}
-                  onClick={() => {
-                    onChange(option.value);
-                    setIsOpen(false);
-                  }}
-                >
-                  <span>{option.label}</span>
-                  {isSelected ? <span className="creator-filter-select__check">•</span> : null}
-                </button>
-              );
-            })}
-          </div>
-        ) : null}
+                  {option.label}
+                </span>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
     </div>
   );

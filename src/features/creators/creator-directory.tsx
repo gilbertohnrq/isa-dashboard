@@ -3,10 +3,13 @@
 import { startTransition, useDeferredValue, useState } from "react";
 import Link from "next/link";
 
+import { motion } from "motion/react";
+
 import { GlassPanel } from "@/design-system/glass-panel";
 import { CreatorAvatar } from "@/features/creators/creator-avatar";
 import { FilterSelect } from "@/features/creators/filter-select";
 import type { CreatorDirectoryItem } from "@/features/creators/types";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 function uniqueValues(values: string[]) {
@@ -49,7 +52,8 @@ export function CreatorDirectory({ items }: { items: CreatorDirectoryItem[] }) {
     return matchesSearch && matchesStatus && matchesTier && matchesProject;
   });
 
-  const activeCount = items.filter((item) => item.statusTone === "positive").length;
+
+
   const statusOptions = [{ value: "all", label: "Todos" }, ...statuses.map((value) => ({ value, label: value }))];
   const tierOptions = [{ value: "all", label: "Todos" }, ...tiers.map((value) => ({ value, label: value }))];
   const projectOptions = [{ value: "all", label: "Todos" }, ...projects.map((value) => ({ value, label: value }))];
@@ -93,78 +97,37 @@ export function CreatorDirectory({ items }: { items: CreatorDirectoryItem[] }) {
     itemsByProject[key].sort((a, b) => (a.tierNum ?? 3) - (b.tierNum ?? 3));
   });
 
-  return (
+return (
     <div className="dashboard-shell">
-      <section className="creator-directory-hero">
-        <div>
-          <span className="creator-directory-hero__eyebrow">Creator Index</span>
-          <h1 className="creator-directory-hero__title">Todos os criadores da base</h1>
-          <p className="creator-directory-hero__copy">
-            Navegue pelo catálogo, filtre por status e tier e abra o dashboard real de cada
-            criador.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <GlassPanel className="creator-metric-card p-4">
-            <span className="creator-metric-card__label">Total</span>
-            <strong className="creator-metric-card__value">{items.length}</strong>
-          </GlassPanel>
-          <GlassPanel className="creator-metric-card p-4">
-            <span className="creator-metric-card__label">Ativos</span>
-            <strong className="creator-metric-card__value">{activeCount}</strong>
-          </GlassPanel>
-          <GlassPanel className="creator-metric-card p-4">
-            <span className="creator-metric-card__label">Filtrados</span>
-            <strong className="creator-metric-card__value">{visibleItems.length}</strong>
-          </GlassPanel>
-        </div>
-      </section>
-
-      <GlassPanel className="creator-directory-filters p-4">
-        <div className="creator-filter-field creator-filter-field--search">
-          <label htmlFor="creator-search" className="creator-filter-field__label">
-            Buscar
-          </label>
-          <input
-            id="creator-search"
-            className="creator-filter-input"
-            type="search"
-            placeholder="Nome ou nickname"
-            value={search}
-            onChange={(event) => {
-              const nextValue = event.target.value;
-              startTransition(() => setSearch(nextValue));
-            }}
+      <header className="creator-header">
+        <div className="creator-header-logo-wrapper">
+          <motion.img 
+            src="https://theclassic.games/assets/img/logo_theclassic.png" 
+            alt="The Classic Games"
+            className="creator-header-logo"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
           />
         </div>
 
-        <FilterSelect
-          label="Status"
-          value={status}
-          options={statusOptions}
-          onChange={(nextValue) => {
-            startTransition(() => setStatus(nextValue));
-          }}
-        />
+        <div className="creator-header-search">
+          <Input 
+            className="creator-header-input"
+            placeholder="Buscar creators..."
+            value={search}
+            onChange={(e) => startTransition(() => setSearch(e.target.value))}
+          />
+        </div>
 
-        <FilterSelect
-          label="Tier"
-          value={tier}
-          options={tierOptions}
-          onChange={(nextValue) => {
-            startTransition(() => setTier(nextValue));
-          }}
-        />
+        <div className="creator-header-spacer" />
 
-        <FilterSelect
-          label="Projeto"
-          value={project}
-          options={projectOptions}
-          onChange={(nextValue) => {
-            startTransition(() => setProject(nextValue));
-          }}
-        />
-      </GlassPanel>
+        <div className="creator-header-filters">
+          <FilterSelect label="Status" value={status} options={statusOptions} onChange={setStatus} />
+          <FilterSelect label="Tier" value={tier} options={tierOptions} onChange={setTier} />
+          <FilterSelect label="Projeto" value={project} options={projectOptions} onChange={setProject} gameIcons={PROJECT_ICONS} />
+        </div>
+      </header>
 
       <div className="mt-8 space-y-12">
         {sortedProjects.map((projectGroup) => {
