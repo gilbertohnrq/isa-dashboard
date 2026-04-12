@@ -72,12 +72,30 @@ function PillGlyph({ className }: { className?: string }) {
   );
 }
 
+function EyeGlyph({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
+function DiamondGlyph({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M12 2 2 9l10 13 10-13-10-7Z" />
+    </svg>
+  );
+}
+
 const goalConfig: Record<
   GoalKey,
   {
     label: string;
     icon: ({ className }: { className?: string }) => ReactElement;
     colorClassName: string;
+    currentColorClassName: string;
     suffix?: string;
   }
 > = {
@@ -85,17 +103,20 @@ const goalConfig: Record<
     label: "Live",
     icon: CameraGlyph,
     colorClassName: "creator-card-progress__icon--ruby",
+    currentColorClassName: "creator-card-progress__current--ruby",
     suffix: "h",
   },
   longVideos: {
     label: "Longos",
     icon: BagGlyph,
     colorClassName: "creator-card-progress__icon--lime",
+    currentColorClassName: "creator-card-progress__current--lime",
   },
   shortVideos: {
     label: "Curtos",
     icon: PillGlyph,
     colorClassName: "creator-card-progress__icon--rose",
+    currentColorClassName: "creator-card-progress__current--rose",
   },
 };
 
@@ -291,6 +312,10 @@ function CreatorCard({ item }: { item: CreatorDirectoryItem }) {
               const progress = getProgress(realized, target);
               const Icon = config.icon;
 
+              const currentLabel = formatCompactMetric(realized ?? 0);
+              const targetLabel = formatCompactMetric(target ?? 0);
+              const suffix = config.suffix ?? "";
+
               return (
                 <div key={goalKey} className="creator-card-progress">
                   <span className={cn("creator-card-progress__icon", config.colorClassName)}>
@@ -300,7 +325,8 @@ function CreatorCard({ item }: { item: CreatorDirectoryItem }) {
                     <span className="creator-card-progress__bar" style={{ width: `${progress}%` }} />
                   </div>
                   <span className="creator-card-progress__value">
-                    {formatRatio(realized, target, config.suffix)}
+                    <span className={cn("creator-card-progress__value-current", config.currentColorClassName)}>{currentLabel}{suffix}</span>
+                    <span className="creator-card-progress__value-target"> / {targetLabel}{suffix}</span>
                   </span>
                 </div>
               );
@@ -311,8 +337,11 @@ function CreatorCard({ item }: { item: CreatorDirectoryItem }) {
         <div className="creator-card-v2__finance">
           <div className="creator-finance-item">
             <div className="creator-finance-item__header">
-              <span>R$</span>
-              <span>{formatRatio(item.receivables?.amountReal?.current, item.receivables?.amountReal?.contract)}</span>
+              <span className="creator-finance-item__label">R$</span>
+              <span className="creator-finance-item__ratio">
+                <span className="creator-finance-item__current creator-finance-item__current--green">{formatCompactMetric(item.receivables?.amountReal?.current)}</span>
+                <span className="creator-finance-item__target creator-finance-item__target--green"> / {formatCompactMetric(item.receivables?.amountReal?.contract)}</span>
+              </span>
             </div>
             <div className="creator-finance-item__track">
               <span className="creator-finance-item__bar creator-finance-item__bar--green" style={{ width: `${financialProgress.real}%` }} />
@@ -321,8 +350,11 @@ function CreatorCard({ item }: { item: CreatorDirectoryItem }) {
 
           <div className="creator-finance-item">
             <div className="creator-finance-item__header">
-              <span>TCC</span>
-              <span>{formatRatio(item.receivables?.amountTCC?.current, item.receivables?.amountTCC?.contract)}</span>
+              <span className="creator-finance-item__label">TCC</span>
+              <span className="creator-finance-item__ratio">
+                <span className="creator-finance-item__current creator-finance-item__current--amber">{formatCompactMetric(item.receivables?.amountTCC?.current)}</span>
+                <span className="creator-finance-item__target creator-finance-item__target--amber"> / {formatCompactMetric(item.receivables?.amountTCC?.contract)}</span>
+              </span>
             </div>
             <div className="creator-finance-item__track">
               <span className="creator-finance-item__bar creator-finance-item__bar--amber" style={{ width: `${financialProgress.tcc}%` }} />
@@ -332,13 +364,15 @@ function CreatorCard({ item }: { item: CreatorDirectoryItem }) {
 
         <div className="creator-card-v2__footer">
           <span className="creator-card-v2__metric">
-            <span className="creator-card-v2__metric-dot" />
+            <EyeGlyph className="creator-card-v2__metric-icon" />
             {formatCompactMetric(item.monthlyInfo?.clicks)} / {formatCompactMetric(item.monthlyInfo?.convertedClicks)}
           </span>
           <span className="creator-card-v2__metric creator-card-v2__metric--positive">
+            <DiamondGlyph className="creator-card-v2__metric-icon" />
             R$ {formatCompactMetric(item.monthlyInfo?.couponUsageReal)}
           </span>
           <span className="creator-card-v2__metric creator-card-v2__metric--muted">
+            <DiamondGlyph className="creator-card-v2__metric-icon" />
             {formatCurrencyStat(item.receivables?.cashbackTCC)}
           </span>
           <span className="creator-card-v2__metric creator-card-v2__metric--time">{item.lastActivity}</span>
