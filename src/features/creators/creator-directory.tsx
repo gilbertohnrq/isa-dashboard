@@ -1,7 +1,7 @@
 "use client";
 
 import { startTransition, useDeferredValue, useState } from "react";
-import Link from "next/link";
+import { Link } from "next-view-transitions";
 
 import { motion } from "motion/react";
 
