@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactElement } from "react";
 import { startTransition, useDeferredValue, useState } from "react";
 import { Link } from "next-view-transitions";
 import {
@@ -75,7 +76,7 @@ const goalConfig: Record<
   GoalKey,
   {
     label: string;
-    icon: ({ className }: { className?: string }) => JSX.Element;
+    icon: ({ className }: { className?: string }) => ReactElement;
     colorClassName: string;
     suffix?: string;
   }
