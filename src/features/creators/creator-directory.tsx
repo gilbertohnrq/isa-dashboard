@@ -281,7 +281,12 @@ function CreatorCard({ item }: { item: CreatorDirectoryItem }) {
                   : goalKey === "longVideos"
                     ? item.goals?.longVideos
                     : item.goals?.shortVideos;
-              const realized = goalKey === "liveHours" ? goal?.realized : goal?.delivered;
+              const realized =
+                goalKey === "liveHours"
+                  ? item.goals?.liveHours?.realized
+                  : goalKey === "longVideos"
+                    ? item.goals?.longVideos?.delivered
+                    : item.goals?.shortVideos?.delivered;
               const target = goal?.target;
               const progress = getProgress(realized, target);
               const Icon = config.icon;
